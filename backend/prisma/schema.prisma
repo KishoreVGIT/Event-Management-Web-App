@@ -1,15 +1,79 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+// Prisma schema file for event management platform
+// Run 'npx prisma generate' after saving to generate client types
 
 generator client {
   provider = "prisma-client-js"
-  output   = "../src/generated/prisma"
 }
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+}
+
+// Enum for user roles
+enum UserRole {
+  student
+  organizer
+  admin
+}
+
+// User model (updated from original PostgreSQL schema)
+model User {
+  id             BigInt        @id @default(autoincrement()) @db.BigInt
+  name           String        @db.VarChar(100)
+  email          String        @unique @db.VarChar(255)
+  passwordHash   String        @db.VarChar(255)
+  role           UserRole
+  createdAt      DateTime      @default(now()) @db.Timestamp(6)
+  updatedAt      DateTime      @updatedAt @db.Timestamp(6)
+  
+  // Relations
+  profile        UserProfile?  // One-to-One: Optional profile
+  events         Event[]       @relation("UserEvents")  // One-to-Many: Events organized by user
+  attendedEvents EventAttendee[]  // Many-to-Many: Events attended (via junction)
+  
+  @@map("users")  // Custom table name
+}
+
+// UserProfile model (One-to-One relation with User)
+model UserProfile {
+  id        BigInt     @id @default(autoincrement()) @db.BigInt
+  userId    BigInt     @unique @db.BigInt @map("user_id")  // Foreign key with custom column name
+  bio       String?    @db.VarChar(500)  // Example field (optional; expand as needed)
+  createdAt DateTime   @default(now()) @db.Timestamp(6)
+  updatedAt DateTime   @updatedAt @db.Timestamp(6)
+  
+  user      User       @relation(fields: [userId], references: [id])  // Relation back to User
+  
+  @@map("user_profiles")
+}
+
+// Event model (One-to-Many relation with User as organizer)
+model Event {
+  id          BigInt        @id @default(autoincrement()) @db.BigInt
+  title       String        @db.VarChar(255)
+  description String?       @db.Text  // Example field (optional; expand as needed)
+  date        DateTime?     @db.Timestamp(6)  // Example field
+  userId      BigInt        @db.BigInt @map("user_id")  // Foreign key with custom column name
+  createdAt   DateTime      @default(now()) @db.Timestamp(6)
+  updatedAt   DateTime      @updatedAt @db.Timestamp(6)
+  
+  user        User          @relation("UserEvents", fields: [userId], references: [id])  // Relation to organizer
+  attendees   EventAttendee[]  // Many-to-Many: Attendees (via junction)
+  
+  @@map("events")
+}
+
+// EventAttendee model (junction table for Many-to-Many between User and Event)
+model EventAttendee {
+  id      BigInt   @id @default(autoincrement()) @db.BigInt
+  userId  BigInt   @db.BigInt @map("user_id")  // Foreign key to User
+  eventId BigInt   @db.BigInt @map("event_id")  // Foreign key to Event
+  status  String?  @db.VarChar(50)  // Example field (e.g., 'confirmed'; optional)
+  
+  user    User     @relation(fields: [userId], references: [id])  // Relation to User
+  event   Event    @relation(fields: [eventId], references: [id])  // Relation to Event
+  
+  @@unique([userId, eventId])  // Composite unique constraint (prevents duplicate attendance)
+  @@map("event_attendees")
 }
