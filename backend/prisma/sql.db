@@ -1,0 +1,12 @@
+-- Create the ENUM type for the role field
+CREATE TYPE user_role AS ENUM ('student', 'organizer', 'admin');
+
+-- Create the Users table
+CREATE TABLE Users (
+    id BIGSERIAL PRIMARY KEY,  -- Auto-incrementing primary key for unique user identification
+    name VARCHAR(100) NOT NULL,  -- User's full name, required for all users
+    email VARCHAR(255) NOT NULL UNIQUE,  -- User's email address, required and must be unique (e.g., for login)
+    passwordHash VARCHAR(255) NOT NULL,  -- Hashed password for security; always hash passwords in your application before storing
+    role user_role NOT NULL,  -- User's role, limited to predefined values
+    createdAt TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP  -- Timestamp when the user account was created; automatically set
+);
