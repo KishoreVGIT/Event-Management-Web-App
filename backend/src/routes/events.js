@@ -117,3 +117,68 @@ router.get('/:id', async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch event' });
   }
 });
+
+// Get events created by the authenticated organizer
+router.get(
+  '/organizer/my-events',
+  authenticate,
+  requireOrganizer,
+  async (req, res) => {
+    try {
+      const result = await query(
+        `
+        SELECT
+          e.id, e.title, e.description, e.start_date, e.end_date, e.user_id, e."createdAt", e."updatedAt"
+        FROM events e
+        WHERE e.user_id = $1
+        ORDER BY e.start_date ASC NULLS LAST
+      `,
+        [req.user.userId]
+      );
+
+      // Get attendees for each event
+      const events = await Promise.all(
+        result.rows.map(async (event) => {
+          const attendeesResult = await query(
+            `
+          SELECT
+            ea.id, ea.user_id, ea.status,
+            u.id as user_id, u.name as user_name, u.email as user_email
+          FROM event_attendees ea
+          JOIN users u ON ea.user_id = u.id
+          WHERE ea.event_id = $1
+        `,
+            [event.id]
+          );
+
+          return {
+            id: event.id,
+            title: event.title,
+            description: event.description,
+            startDate: event.start_date,
+            endDate: event.end_date,
+            userId: event.user_id,
+            createdAt: event.createdAt,
+            updatedAt: event.updatedAt,
+            attendees: attendeesResult.rows.map((a) => ({
+              id: a.id,
+              userId: a.user_id,
+              status: a.status,
+              user: {
+                id: a.user_id,
+                name: a.user_name,
+                email: a.user_email,
+              },
+            })),
+            attendeeCount: attendeesResult.rows.length,
+          };
+        })
+      );
+
+      res.json(events);
+    } catch (error) {
+      console.error('Error fetching organizer events:', error);
+      res.status(500).json({ error: 'Failed to fetch your events' });
+    }
+  }
+);
