@@ -182,3 +182,52 @@ router.get(
     }
   }
 );
+
+// Create new event (organizer only)
+router.post('/', authenticate, requireOrganizer, async (req, res) => {
+  try {
+    const { title, description, startDate, endDate } = req.body;
+
+    if (!title) {
+      return res.status(400).json({ error: 'Title is required' });
+    }
+
+    const result = await query(
+      `
+        INSERT INTO events (title, description, start_date, end_date, user_id)
+        VALUES ($1, $2, $3, $4, $5)
+        RETURNING id, title, description, start_date, end_date, user_id, "createdAt", "updatedAt"
+      `,
+      [
+        title,
+        description,
+        startDate ? new Date(startDate) : null,
+        endDate ? new Date(endDate) : null,
+        req.user.userId,
+      ]
+    );
+
+    const event = result.rows[0];
+
+    // Get organizer info
+    const userResult = await query(
+      'SELECT id, name, email FROM users WHERE id = $1',
+      [req.user.userId]
+    );
+
+    res.status(201).json({
+      id: event.id,
+      title: event.title,
+      description: event.description,
+      startDate: event.start_date,
+      endDate: event.end_date,
+      userId: event.user_id,
+      createdAt: event.createdAt,
+      updatedAt: event.updatedAt,
+      user: userResult.rows[0],
+    });
+  } catch (error) {
+    console.error('Error creating event:', error);
+    res.status(500).json({ error: 'Failed to create event' });
+  }
+});
