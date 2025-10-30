@@ -322,3 +322,41 @@ router.put(
     }
   }
 );
+
+// Delete event (organizer only - must own the event)
+router.delete(
+  '/:id',
+  authenticate,
+  requireOrganizer,
+  async (req, res) => {
+    try {
+      const { id } = req.params;
+
+      // Check if event exists and belongs to user
+      const existingEvent = await query(
+        'SELECT user_id FROM events WHERE id = $1',
+        [id]
+      );
+
+      if (existingEvent.rows.length === 0) {
+        return res.status(404).json({ error: 'Event not found' });
+      }
+
+      if (existingEvent.rows[0].user_id !== req.user.userId) {
+        return res
+          .status(403)
+          .json({ error: 'You can only delete your own events' });
+      }
+
+      // Delete event (attendees will be deleted automatically due to CASCADE)
+      await query('DELETE FROM events WHERE id = $1', [id]);
+
+      res.json({ message: 'Event deleted successfully' });
+    } catch (error) {
+      console.error('Error deleting event:', error);
+      res.status(500).json({ error: 'Failed to delete event' });
+    }
+  }
+);
+
+export default router;
