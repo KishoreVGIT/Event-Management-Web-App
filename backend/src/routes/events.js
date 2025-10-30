@@ -231,3 +231,94 @@ router.post('/', authenticate, requireOrganizer, async (req, res) => {
     res.status(500).json({ error: 'Failed to create event' });
   }
 });
+
+// Update event (organizer only - must own the event)
+router.put(
+  '/:id',
+  authenticate,
+  requireOrganizer,
+  async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { title, description, startDate, endDate } = req.body;
+
+      // Check if event exists and belongs to user
+      const existingEvent = await query(
+        'SELECT user_id FROM events WHERE id = $1',
+        [id]
+      );
+
+      if (existingEvent.rows.length === 0) {
+        return res.status(404).json({ error: 'Event not found' });
+      }
+
+      if (existingEvent.rows[0].user_id !== req.user.userId) {
+        return res
+          .status(403)
+          .json({ error: 'You can only edit your own events' });
+      }
+
+      // Update event
+      const result = await query(
+        `
+        UPDATE events
+        SET title = $1, description = $2, start_date = $3, end_date = $4, "updatedAt" = CURRENT_TIMESTAMP
+        WHERE id = $5
+        RETURNING id, title, description, start_date, end_date, user_id, "createdAt", "updatedAt"
+      `,
+        [
+          title,
+          description,
+          startDate ? new Date(startDate) : null,
+          endDate ? new Date(endDate) : null,
+          id,
+        ]
+      );
+
+      const event = result.rows[0];
+
+      // Get organizer info and attendees
+      const userResult = await query(
+        'SELECT id, name, email FROM users WHERE id = $1',
+        [event.user_id]
+      );
+
+      const attendeesResult = await query(
+        `
+        SELECT
+          ea.id, ea.user_id, ea.status,
+          u.id as user_id, u.name as user_name, u.email as user_email
+        FROM event_attendees ea
+        JOIN users u ON ea.user_id = u.id
+        WHERE ea.event_id = $1
+      `,
+        [id]
+      );
+
+      res.json({
+        id: event.id,
+        title: event.title,
+        description: event.description,
+        startDate: event.start_date,
+        endDate: event.end_date,
+        userId: event.user_id,
+        createdAt: event.createdAt,
+        updatedAt: event.updatedAt,
+        user: userResult.rows[0],
+        attendees: attendeesResult.rows.map((a) => ({
+          id: a.id,
+          userId: a.user_id,
+          status: a.status,
+          user: {
+            id: a.user_id,
+            name: a.user_name,
+            email: a.user_email,
+          },
+        })),
+      });
+    } catch (error) {
+      console.error('Error updating event:', error);
+      res.status(500).json({ error: 'Failed to update event' });
+    }
+  }
+);
