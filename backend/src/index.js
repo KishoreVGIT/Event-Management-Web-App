@@ -16,3 +16,41 @@ app.use(helmet());
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+app.get('/health', (_req, res) => {
+  res
+    .status(200)
+    .json({ status: 'OK', message: 'Server is running' });
+});
+
+app.get('/', (_req, res) => {
+  res.json({ message: 'Event Management API' });
+});
+
+// API Routes
+app.use('/api/auth', authRoutes);
+app.use('/api/events', eventRoutes);
+app.use('/api/rsvp', rsvpRoutes);
+
+async function startServer() {
+  try {
+    // Test database connection
+    await pool.query('SELECT NOW()');
+    console.log('Database connected successfully');
+
+    app.listen(PORT, () => {
+      console.log(`Server is running on port ${PORT}`);
+    });
+  } catch (error) {
+    console.error('Failed to start server:', error);
+    process.exit(1);
+  }
+}
+
+process.on('SIGINT', async () => {
+  console.log('Shutting down gracefully...');
+  await end();
+  process.exit(0);
+});
+
+startServer().catch(console.error);
