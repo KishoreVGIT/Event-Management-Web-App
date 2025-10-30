@@ -45,3 +45,12 @@ CREATE TABLE "event_attendees" (
     CONSTRAINT "event_attendees_event_id_fkey" FOREIGN KEY ("event_id") REFERENCES "events"("id") ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT "event_attendees_user_id_event_id_key" UNIQUE ("user_id", "event_id")
 );
+
+-- Indexes for performance
+CREATE INDEX "users_email_idx" ON "users"("email");
+CREATE INDEX "user_profiles_user_id_idx" ON "user_profiles"("user_id");
+CREATE INDEX "events_user_id_idx" ON "events"("user_id");
+CREATE INDEX "events_start_date_idx" ON "events"("start_date");
+CREATE INDEX "events_end_date_idx" ON "events"("end_date");
+CREATE INDEX "event_attendees_user_id_idx" ON "event_attendees"("user_id");
+CREATE INDEX "event_attendees_event_id_idx" ON "event_attendees"("event_id");
