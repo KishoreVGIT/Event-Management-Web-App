@@ -69,6 +69,7 @@ const handleDatabaseError = (error, res, defaultMessage) => {
   if (errorCode && pgErrorCodes[errorCode]) {
     const errorInfo = pgErrorCodes[errorCode];
     return res.status(errorInfo.status).json({
+      success: false,
       error: errorInfo.message,
       code: errorCode,
     });
@@ -77,12 +78,14 @@ const handleDatabaseError = (error, res, defaultMessage) => {
   // Handle connection errors
   if (error.message && error.message.includes('connection')) {
     return res.status(503).json({
+      success: false,
       error: 'Database connection error. Please try again later.',
     });
   }
 
   // Default error response
   return res.status(500).json({
+    success: false,
     error: defaultMessage || 'An unexpected error occurred',
     ...(process.env.NODE_ENV === 'development' && {
       details: error.message,
@@ -105,25 +108,30 @@ router.get('/', async (req, res) => {
       ORDER BY e.start_date ASC NULLS LAST
     `);
 
-    const events = result.rows.map((row) => ({
-      id: row.id,
-      title: row.title,
-      description: row.description,
-      startDate: row.start_date,
-      endDate: row.end_date,
-      userId: row.user_id,
-      createdAt: row.createdAt,
-      updatedAt: row.updatedAt,
-      user: {
-        id: row.organizer_id,
-        name: row.organizer_name,
-        email: row.organizer_email,
-      },
-      attendeeCount: row.attendee_count,
-      attendees: [], // Will be populated if needed in detail view
-    }));
+      const events = result.rows.map((row) => ({
+        id: row.id,
+        title: row.title,
+        description: row.description,
+        startDate: row.start_date,
+        endDate: row.end_date,
+        userId: row.user_id,
+        createdAt: row.createdAt,
+        updatedAt: row.updatedAt,
+        organizer: {
+          id: row.organizer_id,
+          name: row.organizer_name,
+          email: row.organizer_email,
+        },
+        attendeeCount: row.attendee_count,
+        attendees: [], // Will be populated if needed in detail view
+      }));
 
-    res.json(events);
+    res.status(200).json({
+      success: true,
+      message: 'Events retrieved successfully',
+      data: events,
+      count: events.length,
+    });
   } catch (error) {
     return handleDatabaseError(error, res, 'Failed to fetch events');
   }
@@ -136,9 +144,10 @@ router.get('/:id', async (req, res) => {
 
     // Validate ID format
     if (!isValidUUID(id)) {
-      return res
-        .status(400)
-        .json({ error: 'Invalid event ID format' });
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid event ID format',
+      });
     }
 
     // Get event with organizer info
@@ -155,7 +164,10 @@ router.get('/:id', async (req, res) => {
     );
 
     if (eventResult.rows.length === 0) {
-      return res.status(404).json({ error: 'Event not found' });
+      return res.status(404).json({
+        success: false,
+        error: 'Event not found',
+      });
     }
 
     const eventRow = eventResult.rows[0];
@@ -182,7 +194,7 @@ router.get('/:id', async (req, res) => {
       userId: eventRow.user_id,
       createdAt: eventRow.createdAt,
       updatedAt: eventRow.updatedAt,
-      user: {
+      organizer: {
         id: eventRow.organizer_id,
         name: eventRow.organizer_name,
         email: eventRow.organizer_email,
@@ -200,7 +212,11 @@ router.get('/:id', async (req, res) => {
       attendeeCount: attendeesResult.rows.length,
     };
 
-    res.json(event);
+    res.status(200).json({
+      success: true,
+      message: 'Event retrieved successfully',
+      data: event,
+    });
   } catch (error) {
     return handleDatabaseError(error, res, 'Failed to fetch event');
   }
@@ -214,9 +230,10 @@ router.get(
   async (req, res) => {
     try {
       if (!req.user?.userId) {
-        return res
-          .status(401)
-          .json({ error: 'User ID not found in token' });
+        return res.status(401).json({
+          success: false,
+          error: 'User ID not found in token',
+        });
       }
 
       const result = await query(
@@ -289,7 +306,12 @@ router.get(
         })
       );
 
-      res.json(events);
+      res.status(200).json({
+        success: true,
+        message: 'Your events retrieved successfully',
+        data: events,
+        count: events.length,
+      });
     } catch (error) {
       return handleDatabaseError(
         error,
@@ -312,12 +334,14 @@ router.post('/', authenticate, requireOrganizer, async (req, res) => {
       title.trim().length === 0
     ) {
       return res.status(400).json({
+        success: false,
         error: 'Title is required and must be a non-empty string',
       });
     }
 
     if (title.length > 255) {
       return res.status(400).json({
+        success: false,
         error: 'Title must be 255 characters or less',
       });
     }
@@ -337,13 +361,17 @@ router.post('/', authenticate, requireOrganizer, async (req, res) => {
       // Validate date range
       validateDateRange(parsedStartDate, parsedEndDate);
     } catch (dateError) {
-      return res.status(400).json({ error: dateError.message });
+      return res.status(400).json({
+        success: false,
+        error: dateError.message,
+      });
     }
 
     if (!req.user?.userId) {
-      return res
-        .status(401)
-        .json({ error: 'User ID not found in token' });
+      return res.status(401).json({
+        success: false,
+        error: 'User ID not found in token',
+      });
     }
 
     const result = await query(
@@ -370,10 +398,13 @@ router.post('/', authenticate, requireOrganizer, async (req, res) => {
     );
 
     if (userResult.rows.length === 0) {
-      return res.status(404).json({ error: 'Organizer not found' });
+      return res.status(404).json({
+        success: false,
+        error: 'Organizer not found',
+      });
     }
 
-    res.status(201).json({
+    const eventData = {
       id: event.id,
       title: event.title,
       description: event.description,
@@ -382,12 +413,25 @@ router.post('/', authenticate, requireOrganizer, async (req, res) => {
       userId: event.user_id,
       createdAt: event.createdAt,
       updatedAt: event.updatedAt,
-      user: userResult.rows[0],
+      organizer: {
+        id: userResult.rows[0].id,
+        name: userResult.rows[0].name,
+        email: userResult.rows[0].email,
+      },
+    };
+
+    res.status(201).json({
+      success: true,
+      message: 'Event created successfully',
+      data: eventData,
     });
   } catch (error) {
     // Check if it's a validation error we threw
     if (error.message && !error.code) {
-      return res.status(400).json({ error: error.message });
+      return res.status(400).json({
+        success: false,
+        error: error.message,
+      });
     }
     return handleDatabaseError(error, res, 'Failed to create event');
   }
@@ -411,9 +455,10 @@ router.put(
       }
 
       if (!req.user?.userId) {
-        return res
-          .status(401)
-          .json({ error: 'User ID not found in token' });
+        return res.status(401).json({
+          success: false,
+          error: 'User ID not found in token',
+        });
       }
 
       // Check if event exists and belongs to user
@@ -423,13 +468,17 @@ router.put(
       );
 
       if (existingEvent.rows.length === 0) {
-        return res.status(404).json({ error: 'Event not found' });
+        return res.status(404).json({
+          success: false,
+          error: 'Event not found',
+        });
       }
 
       if (existingEvent.rows[0].user_id !== req.user.userId) {
-        return res
-          .status(403)
-          .json({ error: 'You can only edit your own events' });
+        return res.status(403).json({
+          success: false,
+          error: 'You can only edit your own events',
+        });
       }
 
       const existingStartDate = existingEvent.rows[0].start_date;
@@ -439,11 +488,13 @@ router.put(
       if (title !== undefined) {
         if (typeof title !== 'string' || title.trim().length === 0) {
           return res.status(400).json({
+            success: false,
             error: 'Title must be a non-empty string if provided',
           });
         }
         if (title.length > 255) {
           return res.status(400).json({
+            success: false,
             error: 'Title must be 255 characters or less',
           });
         }
@@ -489,7 +540,10 @@ router.put(
           }
         }
       } catch (dateError) {
-        return res.status(400).json({ error: dateError.message });
+        return res.status(400).json({
+          success: false,
+          error: dateError.message,
+        });
       }
 
       // Build update query dynamically based on provided fields
@@ -515,7 +569,10 @@ router.put(
       }
 
       if (updateFields.length === 0) {
-        return res.status(400).json({ error: 'No fields to update' });
+        return res.status(400).json({
+          success: false,
+          error: 'No fields to update',
+        });
       }
 
       updateFields.push(`"updatedAt" = CURRENT_TIMESTAMP`);
@@ -556,7 +613,7 @@ router.put(
         [id]
       );
 
-      res.json({
+      const eventData = {
         id: event.id,
         title: event.title,
         description: event.description,
@@ -565,7 +622,11 @@ router.put(
         userId: event.user_id,
         createdAt: event.createdAt,
         updatedAt: event.updatedAt,
-        user: userResult.rows[0],
+        organizer: {
+          id: userResult.rows[0].id,
+          name: userResult.rows[0].name,
+          email: userResult.rows[0].email,
+        },
         attendees: attendeesResult.rows.map((a) => ({
           id: a.id,
           userId: a.user_id,
@@ -576,6 +637,13 @@ router.put(
             email: a.user_email,
           },
         })),
+        attendeeCount: attendeesResult.rows.length,
+      };
+
+      res.status(200).json({
+        success: true,
+        message: 'Event updated successfully',
+        data: eventData,
       });
     } catch (error) {
       // Check if it's a validation error we threw
@@ -608,9 +676,10 @@ router.delete(
       }
 
       if (!req.user?.userId) {
-        return res
-          .status(401)
-          .json({ error: 'User ID not found in token' });
+        return res.status(401).json({
+          success: false,
+          error: 'User ID not found in token',
+        });
       }
 
       // Check if event exists and belongs to user
@@ -620,13 +689,17 @@ router.delete(
       );
 
       if (existingEvent.rows.length === 0) {
-        return res.status(404).json({ error: 'Event not found' });
+        return res.status(404).json({
+          success: false,
+          error: 'Event not found',
+        });
       }
 
       if (existingEvent.rows[0].user_id !== req.user.userId) {
-        return res
-          .status(403)
-          .json({ error: 'You can only delete your own events' });
+        return res.status(403).json({
+          success: false,
+          error: 'You can only delete your own events',
+        });
       }
 
       // Delete event (attendees will be deleted automatically due to CASCADE)
@@ -637,12 +710,16 @@ router.delete(
 
       if (deleteResult.rowCount === 0) {
         // This shouldn't happen since we checked above, but handle it anyway
-        return res
-          .status(404)
-          .json({ error: 'Event not found or already deleted' });
+        return res.status(404).json({
+          success: false,
+          error: 'Event not found or already deleted',
+        });
       }
 
-      res.json({ message: 'Event deleted successfully' });
+      res.status(200).json({
+        success: true,
+        message: 'Event deleted successfully',
+      });
     } catch (error) {
       return handleDatabaseError(
         error,
