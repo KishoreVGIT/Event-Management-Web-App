@@ -102,7 +102,6 @@ export default function OrganizerDashboard() {
       minute: '2-digit',
     };
 
-    // Check if it's a multi-day event
     if (end) {
       const startDay = new Date(start);
       startDay.setHours(0, 0, 0, 0);
@@ -110,16 +109,31 @@ export default function OrganizerDashboard() {
       endDay.setHours(0, 0, 0, 0);
 
       if (endDay > startDay) {
-        // Multi-day event - compact format
-        return `${start.toLocaleDateString('en-US', formatOptions)} ${start.toLocaleTimeString('en-US', timeOptions)} - ${end.toLocaleDateString('en-US', formatOptions)} ${end.toLocaleTimeString('en-US', timeOptions)}`;
+        return `${start.toLocaleDateString(
+          'en-US',
+          formatOptions
+        )} ${start.toLocaleTimeString(
+          'en-US',
+          timeOptions
+        )} - ${end.toLocaleDateString(
+          'en-US',
+          formatOptions
+        )} ${end.toLocaleTimeString('en-US', timeOptions)}`;
       } else {
-        // Same day event with end time
-        return `${start.toLocaleDateString('en-US', formatOptions)}, ${start.toLocaleTimeString('en-US', timeOptions)} - ${end.toLocaleTimeString('en-US', timeOptions)}`;
+        return `${start.toLocaleDateString(
+          'en-US',
+          formatOptions
+        )}, ${start.toLocaleTimeString(
+          'en-US',
+          timeOptions
+        )} - ${end.toLocaleTimeString('en-US', timeOptions)}`;
       }
     }
 
-    // Only start time
-    return `${start.toLocaleDateString('en-US', formatOptions)} at ${start.toLocaleTimeString('en-US', timeOptions)}`;
+    return `${start.toLocaleDateString(
+      'en-US',
+      formatOptions
+    )} at ${start.toLocaleTimeString('en-US', timeOptions)}`;
   };
 
   const handleSignOut = () => {
@@ -137,7 +151,6 @@ export default function OrganizerDashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      {/* Navigation Bar */}
       <nav className="bg-white dark:bg-gray-800 shadow">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
@@ -161,7 +174,6 @@ export default function OrganizerDashboard() {
         </div>
       </nav>
 
-      {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8 flex justify-between items-center">
           <div>
@@ -203,7 +215,10 @@ export default function OrganizerDashboard() {
                     <div>
                       <CardTitle>{event.title}</CardTitle>
                       <CardDescription>
-                        {formatEventDate(event.startDate, event.endDate)}
+                        {formatEventDate(
+                          event.startDate,
+                          event.endDate
+                        )}
                       </CardDescription>
                     </div>
                     <span className="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-100 rounded-full text-sm font-medium">

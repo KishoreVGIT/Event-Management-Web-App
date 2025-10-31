@@ -7,7 +7,6 @@ import {
 
 const router = express.Router();
 
-// Get all events (public - no auth required)
 router.get('/', async (req, res) => {
   try {
     const result = await query(`
@@ -37,7 +36,7 @@ router.get('/', async (req, res) => {
         email: row.organizer_email,
       },
       attendeeCount: row.attendee_count,
-      attendees: [], // Will be populated if needed in detail view
+      attendees: [],
     }));
 
     res.json(events);
@@ -47,12 +46,10 @@ router.get('/', async (req, res) => {
   }
 });
 
-// Get single event by ID (public)
 router.get('/:id', async (req, res) => {
   try {
     const { id } = req.params;
 
-    // Get event with organizer info
     const eventResult = await query(
       `
       SELECT
@@ -71,7 +68,6 @@ router.get('/:id', async (req, res) => {
 
     const eventRow = eventResult.rows[0];
 
-    // Get attendees
     const attendeesResult = await query(
       `
       SELECT
@@ -118,7 +114,6 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// Get events created by the authenticated organizer
 router.get(
   '/organizer/my-events',
   authenticate,
@@ -136,7 +131,6 @@ router.get(
         [req.user.userId]
       );
 
-      // Get attendees for each event
       const events = await Promise.all(
         result.rows.map(async (event) => {
           const attendeesResult = await query(
@@ -183,7 +177,6 @@ router.get(
   }
 );
 
-// Create new event (organizer only)
 router.post('/', authenticate, requireOrganizer, async (req, res) => {
   try {
     const { title, description, startDate, endDate } = req.body;
@@ -209,7 +202,6 @@ router.post('/', authenticate, requireOrganizer, async (req, res) => {
 
     const event = result.rows[0];
 
-    // Get organizer info
     const userResult = await query(
       'SELECT id, name, email FROM users WHERE id = $1',
       [req.user.userId]
@@ -232,7 +224,6 @@ router.post('/', authenticate, requireOrganizer, async (req, res) => {
   }
 });
 
-// Update event (organizer only - must own the event)
 router.put(
   '/:id',
   authenticate,
@@ -242,7 +233,6 @@ router.put(
       const { id } = req.params;
       const { title, description, startDate, endDate } = req.body;
 
-      // Check if event exists and belongs to user
       const existingEvent = await query(
         'SELECT user_id FROM events WHERE id = $1',
         [id]
@@ -258,7 +248,6 @@ router.put(
           .json({ error: 'You can only edit your own events' });
       }
 
-      // Update event
       const result = await query(
         `
       UPDATE events
@@ -277,7 +266,6 @@ router.put(
 
       const event = result.rows[0];
 
-      // Get organizer info and attendees
       const userResult = await query(
         'SELECT id, name, email FROM users WHERE id = $1',
         [event.user_id]
@@ -323,7 +311,6 @@ router.put(
   }
 );
 
-// Delete event (organizer only - must own the event)
 router.delete(
   '/:id',
   authenticate,
@@ -332,7 +319,6 @@ router.delete(
     try {
       const { id } = req.params;
 
-      // Check if event exists and belongs to user
       const existingEvent = await query(
         'SELECT user_id FROM events WHERE id = $1',
         [id]
@@ -348,7 +334,6 @@ router.delete(
           .json({ error: 'You can only delete your own events' });
       }
 
-      // Delete event (attendees will be deleted automatically due to CASCADE)
       await query('DELETE FROM events WHERE id = $1', [id]);
 
       res.json({ message: 'Event deleted successfully' });

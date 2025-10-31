@@ -30,7 +30,6 @@ export default function EventsPage() {
       );
       const data = await response.json();
 
-      // Ensure data is an array before setting it
       if (Array.isArray(data)) {
         setEvents(data);
       } else {
@@ -63,7 +62,6 @@ export default function EventsPage() {
       minute: '2-digit',
     };
 
-    // Check if it's a multi-day event
     if (end) {
       const startDay = new Date(start);
       startDay.setHours(0, 0, 0, 0);
@@ -71,7 +69,6 @@ export default function EventsPage() {
       endDay.setHours(0, 0, 0, 0);
 
       if (endDay > startDay) {
-        // Multi-day event
         return `${start.toLocaleDateString(
           'en-US',
           formatOptions
@@ -83,7 +80,6 @@ export default function EventsPage() {
           formatOptions
         )} at ${end.toLocaleTimeString('en-US', timeOptions)}`;
       } else {
-        // Same day event with end time
         return `${start.toLocaleDateString(
           'en-US',
           formatOptions
@@ -94,7 +90,6 @@ export default function EventsPage() {
       }
     }
 
-    // Only start time
     return `${start.toLocaleDateString(
       'en-US',
       formatOptions
@@ -108,7 +103,6 @@ export default function EventsPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      {/* Navigation Bar */}
       <nav className="bg-white dark:bg-gray-800 shadow">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
@@ -152,7 +146,6 @@ export default function EventsPage() {
         </div>
       </nav>
 
-      {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
           <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
