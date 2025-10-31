@@ -5,41 +5,44 @@ import { query } from '../db.js';
 
 const router = express.Router();
 
-// JWT secret (in production, use environment variable)
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-this';
+const JWT_SECRET =
+  process.env.JWT_SECRET || 'your-secret-key-change-this';
 
-// Sign up route
 router.post('/signup', async (req, res) => {
   try {
     const { firstName, lastName, email, password, role } = req.body;
 
-    // Validate input
     if (!firstName || !lastName || !email || !password) {
-      return res.status(400).json({ error: 'All fields are required' });
+      return res
+        .status(400)
+        .json({ error: 'All fields are required' });
     }
 
-    // Check if user already exists
     const existingUser = await query(
       'SELECT id FROM users WHERE email = $1',
       [email]
     );
 
     if (existingUser.rows.length > 0) {
-      return res.status(400).json({ error: 'User already exists with this email' });
+      return res
+        .status(400)
+        .json({ error: 'User already exists with this email' });
     }
 
-    // Hash password
     const passwordHash = await bcrypt.hash(password, 10);
 
-    // Create user
     const result = await query(
       'INSERT INTO users (name, email, "passwordHash", role) VALUES ($1, $2, $3, $4) RETURNING id, name, email, role',
-      [`${firstName} ${lastName}`, email, passwordHash, role || 'student']
+      [
+        `${firstName} ${lastName}`,
+        email,
+        passwordHash,
+        role || 'student',
+      ]
     );
 
     const user = result.rows[0];
 
-    // Generate JWT token
     const token = jwt.sign(
       { userId: user.id, email: user.email, role: user.role },
       JWT_SECRET,
@@ -53,8 +56,8 @@ router.post('/signup', async (req, res) => {
         id: user.id,
         name: user.name,
         email: user.email,
-        role: user.role
-      }
+        role: user.role,
+      },
     });
   } catch (error) {
     console.error('Signup error:', error);
@@ -62,36 +65,40 @@ router.post('/signup', async (req, res) => {
   }
 });
 
-// Sign in route
 router.post('/signin', async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // Validate input
     if (!email || !password) {
-      return res.status(400).json({ error: 'Email and password are required' });
+      return res
+        .status(400)
+        .json({ error: 'Email and password are required' });
     }
 
-    // Find user
     const result = await query(
       'SELECT id, name, email, "passwordHash", role FROM users WHERE email = $1',
       [email]
     );
 
     if (result.rows.length === 0) {
-      return res.status(401).json({ error: 'Invalid email or password' });
+      return res
+        .status(401)
+        .json({ error: 'Invalid email or password' });
     }
 
     const user = result.rows[0];
 
-    // Verify password
-    const isValidPassword = await bcrypt.compare(password, user.passwordHash);
+    const isValidPassword = await bcrypt.compare(
+      password,
+      user.passwordHash
+    );
 
     if (!isValidPassword) {
-      return res.status(401).json({ error: 'Invalid email or password' });
+      return res
+        .status(401)
+        .json({ error: 'Invalid email or password' });
     }
 
-    // Generate JWT token
     const token = jwt.sign(
       { userId: user.id, email: user.email, role: user.role },
       JWT_SECRET,
@@ -105,8 +112,8 @@ router.post('/signin', async (req, res) => {
         id: user.id,
         name: user.name,
         email: user.email,
-        role: user.role
-      }
+        role: user.role,
+      },
     });
   } catch (error) {
     console.error('Signin error:', error);
@@ -114,7 +121,6 @@ router.post('/signin', async (req, res) => {
   }
 });
 
-// Get current user (verify token)
 router.get('/me', async (req, res) => {
   try {
     const token = req.headers.authorization?.replace('Bearer ', '');
@@ -141,8 +147,8 @@ router.get('/me', async (req, res) => {
         id: user.id,
         name: user.name,
         email: user.email,
-        role: user.role
-      }
+        role: user.role,
+      },
     });
   } catch (error) {
     console.error('Auth verification error:', error);

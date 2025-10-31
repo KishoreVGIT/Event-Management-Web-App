@@ -4,13 +4,11 @@ import { authenticate } from '../middleware/auth.js';
 
 const router = express.Router();
 
-// RSVP to an event (authenticated users only)
 router.post('/:eventId', authenticate, async (req, res) => {
   try {
     const { eventId } = req.params;
     const userId = req.user.userId;
 
-    // Check if event exists
     const eventCheck = await query(
       'SELECT id FROM events WHERE id = $1',
       [eventId]
@@ -20,7 +18,6 @@ router.post('/:eventId', authenticate, async (req, res) => {
       return res.status(404).json({ error: 'Event not found' });
     }
 
-    // Check if user already RSVP'd
     const existingRsvp = await query(
       'SELECT id FROM event_attendees WHERE user_id = $1 AND event_id = $2',
       [userId, eventId]
@@ -32,7 +29,6 @@ router.post('/:eventId', authenticate, async (req, res) => {
         .json({ error: "You have already RSVP'd to this event" });
     }
 
-    // Create RSVP
     const result = await query(
       `
       INSERT INTO event_attendees (user_id, event_id, status)
@@ -44,7 +40,6 @@ router.post('/:eventId', authenticate, async (req, res) => {
 
     const rsvp = result.rows[0];
 
-    // Get event info
     const eventResult = await query(
       `
       SELECT
@@ -81,41 +76,24 @@ router.post('/:eventId', authenticate, async (req, res) => {
     });
   } catch (error) {
     console.error('Error creating RSVP:', error);
-    res.status(500).json({
-      error: 'Failed to RSVP to event. Please try again later.',
-    });
+    res.status(500).json({ error: 'Failed to RSVP to event' });
   }
 });
 
-// Cancel RSVP (authenticated users only)
 router.delete('/:eventId', authenticate, async (req, res) => {
   try {
     const { eventId } = req.params;
     const userId = req.user.userId;
 
-    // Check if event exists
-    const eventCheck = await query(
-      'SELECT id FROM events WHERE id = $1',
-      [eventId]
-    );
-
-    if (eventCheck.rows.length === 0) {
-      return res.status(404).json({ error: 'Event not found' });
-    }
-
-    // Find existing RSVP
     const existingRsvp = await query(
       'SELECT id FROM event_attendees WHERE user_id = $1 AND event_id = $2',
       [userId, eventId]
     );
 
     if (existingRsvp.rows.length === 0) {
-      return res.status(404).json({
-        error: "RSVP not found. You have not RSVP'd to this event.",
-      });
+      return res.status(404).json({ error: 'RSVP not found' });
     }
 
-    // Delete RSVP
     await query('DELETE FROM event_attendees WHERE id = $1', [
       existingRsvp.rows[0].id,
     ]);
@@ -123,13 +101,10 @@ router.delete('/:eventId', authenticate, async (req, res) => {
     res.json({ message: 'RSVP cancelled successfully' });
   } catch (error) {
     console.error('Error cancelling RSVP:', error);
-    res.status(500).json({
-      error: 'Failed to cancel RSVP. Please try again later.',
-    });
+    res.status(500).json({ error: 'Failed to cancel RSVP' });
   }
 });
 
-// Get user's RSVPs (authenticated users only)
 router.get('/my-rsvps', authenticate, async (req, res) => {
   try {
     const userId = req.user.userId;
@@ -168,34 +143,21 @@ router.get('/my-rsvps', authenticate, async (req, res) => {
           email: row.org_email,
         },
         attendeeCount: row.attendee_count,
-        attendees: [], // Not needed in list view
+        attendees: [],
       },
     }));
 
     res.json(rsvps);
   } catch (error) {
     console.error('Error fetching RSVPs:', error);
-    res.status(500).json({
-      error: 'Failed to fetch your RSVPs. Please try again later.',
-    });
+    res.status(500).json({ error: 'Failed to fetch your RSVPs' });
   }
 });
 
-// Check if user has RSVP'd to a specific event
 router.get('/check/:eventId', authenticate, async (req, res) => {
   try {
     const { eventId } = req.params;
     const userId = req.user.userId;
-
-    // Check if event exists
-    const eventCheck = await query(
-      'SELECT id FROM events WHERE id = $1',
-      [eventId]
-    );
-
-    if (eventCheck.rows.length === 0) {
-      return res.status(404).json({ error: 'Event not found' });
-    }
 
     const result = await query(
       'SELECT id, user_id, event_id, status FROM event_attendees WHERE user_id = $1 AND event_id = $2',
@@ -215,9 +177,7 @@ router.get('/check/:eventId', authenticate, async (req, res) => {
     res.json({ hasRsvp, rsvp });
   } catch (error) {
     console.error('Error checking RSVP:', error);
-    res.status(500).json({
-      error: 'Failed to check RSVP status. Please try again later.',
-    });
+    res.status(500).json({ error: 'Failed to check RSVP status' });
   }
 });
 

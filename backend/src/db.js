@@ -1,15 +1,15 @@
 import pg from 'pg';
 const { Pool } = pg;
 
-// Create a connection pool
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  max: 20, // Maximum number of clients in the pool
+  connectionString:
+    process.env.DATABASE_URL ||
+    'postgresql://postgres:password@localhost:5432/event_management',
+  max: 20,
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 2000,
 });
 
-// Test connection
 pool.on('connect', () => {
   console.log('Connected to PostgreSQL database');
 });
@@ -19,7 +19,6 @@ pool.on('error', (err) => {
   process.exit(-1);
 });
 
-// Helper function to execute queries
 export const query = async (text, params) => {
   const start = Date.now();
   try {
@@ -37,13 +36,11 @@ export const query = async (text, params) => {
   }
 };
 
-// Get a client from the pool for transactions
 export const getClient = async () => {
   const client = await pool.connect();
   return client;
 };
 
-// Close the pool
 export const end = async () => {
   await pool.end();
 };

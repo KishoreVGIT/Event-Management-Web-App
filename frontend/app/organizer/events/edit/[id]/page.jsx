@@ -68,20 +68,20 @@ export default function EditEventPage() {
       if (response.ok) {
         const data = await response.json();
 
-        // Check if user owns this event
         if (data.userId.toString() !== user.id.toString()) {
           alert('You can only edit your own events');
           router.push('/organizer/dashboard');
           return;
         }
 
-        // Populate form
         setValue('title', data.title);
         setValue('description', data.description || '');
 
-        // Set dates as ISO strings for DateTimePicker
         if (data.startDate) {
-          setValue('startDate', new Date(data.startDate).toISOString());
+          setValue(
+            'startDate',
+            new Date(data.startDate).toISOString()
+          );
         }
         if (data.endDate) {
           setValue('endDate', new Date(data.endDate).toISOString());
@@ -141,7 +141,6 @@ export default function EditEventPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      {/* Navigation Bar */}
       <nav className="bg-white dark:bg-gray-800 shadow">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
@@ -159,7 +158,6 @@ export default function EditEventPage() {
         </div>
       </nav>
 
-      {/* Main Content */}
       <main className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Card>
           <CardHeader>
