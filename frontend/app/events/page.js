@@ -1,221 +1,223 @@
 'use client';
 
-import React from 'react';
-import { useForm } from 'react-hook-form';
-import { yupResolver } from '@hookform/resolvers/yup';
-import * as yup from 'yup';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import {
   Card,
+  CardContent,
+  CardDescription,
   CardHeader,
   CardTitle,
-  CardDescription,
-  CardContent,
-  CardFooter,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import {
-  Field,
-  FieldLabel,
-  FieldError,
-  FieldContent,
-} from '@/components/ui/field';
-import img from '@/public/pfw.jpg';
+import { useAuth } from '@/lib/auth-context';
 
-const signUpSchema = yup.object({
-  firstName: yup
-    .string()
-    .required('First name is required')
-    .min(2, 'First name must be at least 2 characters'),
-  lastName: yup
-    .string()
-    .required('Last name is required')
-    .min(2, 'Last name must be at least 2 characters'),
-  email: yup
-    .string()
-    .email('Please enter a valid email')
-    .required('Email is required'),
-  password: yup
-    .string()
-    .required('Password is required')
-    .min(8, 'Password must be at least 8 characters'),
-  confirmPassword: yup
-    .string()
-    .required('Please confirm your password')
-    .oneOf([yup.ref('password')], 'Passwords must match'),
-});
+export default function EventsPage() {
+  const router = useRouter();
+  const { user, signout } = useAuth();
+  const [events, setEvents] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-function SignUp() {
-  const {
-    register,
-    handleSubmit,
-    formState: { errors, isSubmitting },
-  } = useForm({
-    resolver: yupResolver(signUpSchema),
-  });
+  useEffect(() => {
+    fetchEvents();
+  }, []);
 
-  const onSubmit = async (data) => {
+  const fetchEvents = async () => {
     try {
-      console.log('Sign up data:', data);
-      // Add your sign up logic here
-      await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate API call
+      const response = await fetch(
+        'http://localhost:4000/api/events'
+      );
+      const data = await response.json();
+
+      // Ensure data is an array before setting it
+      if (Array.isArray(data)) {
+        setEvents(data);
+      } else {
+        console.error('API returned non-array data:', data);
+        setEvents([]);
+      }
     } catch (error) {
-      console.error('Sign up error:', error);
+      console.error('Error fetching events:', error);
+      setEvents([]);
+    } finally {
+      setLoading(false);
     }
   };
 
+  const formatEventDate = (startDate, endDate) => {
+    if (!startDate) return 'Date TBA';
+
+    const start = new Date(startDate);
+    const end = endDate ? new Date(endDate) : null;
+
+    const formatOptions = {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    };
+
+    const timeOptions = {
+      hour: '2-digit',
+      minute: '2-digit',
+    };
+
+    // Check if it's a multi-day event
+    if (end) {
+      const startDay = new Date(start);
+      startDay.setHours(0, 0, 0, 0);
+      const endDay = new Date(end);
+      endDay.setHours(0, 0, 0, 0);
+
+      if (endDay > startDay) {
+        // Multi-day event
+        return `${start.toLocaleDateString(
+          'en-US',
+          formatOptions
+        )} at ${start.toLocaleTimeString(
+          'en-US',
+          timeOptions
+        )} - ${end.toLocaleDateString(
+          'en-US',
+          formatOptions
+        )} at ${end.toLocaleTimeString('en-US', timeOptions)}`;
+      } else {
+        // Same day event with end time
+        return `${start.toLocaleDateString(
+          'en-US',
+          formatOptions
+        )}, ${start.toLocaleTimeString(
+          'en-US',
+          timeOptions
+        )} - ${end.toLocaleTimeString('en-US', timeOptions)}`;
+      }
+    }
+
+    // Only start time
+    return `${start.toLocaleDateString(
+      'en-US',
+      formatOptions
+    )} at ${start.toLocaleTimeString('en-US', timeOptions)}`;
+  };
+
+  const handleSignOut = () => {
+    signout();
+    router.push('/signin');
+  };
+
   return (
-    <main className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="w-full max-w-4xl">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-          {/* Image Section */}
-          <div className="hidden md:block">
-            <div className="relative h-96 w-full rounded-lg overflow-hidden">
-              <Image
-                src={img}
-                alt="Event management illustration"
-                fill
-                className="object-cover"
-              />
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      {/* Navigation Bar */}
+      <nav className="bg-white dark:bg-gray-800 shadow">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between h-16">
+            <div className="flex items-center">
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+                Campus Connect
+              </h1>
+            </div>
+            <div className="flex items-center space-x-4">
+              {user ? (
+                <>
+                  <span className="text-sm text-gray-700 dark:text-gray-300">
+                    Welcome, {user.name}
+                  </span>
+                  {user.role === 'organizer' && (
+                    <Button
+                      onClick={() =>
+                        router.push('/organizer/dashboard')
+                      }>
+                      Dashboard
+                    </Button>
+                  )}
+                  <Button variant="outline" onClick={handleSignOut}>
+                    Sign Out
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Button
+                    variant="outline"
+                    onClick={() => router.push('/signin')}>
+                    Sign In
+                  </Button>
+                  <Button onClick={() => router.push('/signup')}>
+                    Sign Up
+                  </Button>
+                </>
+              )}
             </div>
           </div>
-
-          {/* Form Section */}
-          <Card className="w-full max-w-md mx-auto">
-            <CardHeader className="text-center">
-              <CardTitle className="text-2xl font-bold">
-                Create your account
-              </CardTitle>
-              <CardDescription>
-                Enter your details to create a new account
-              </CardDescription>
-            </CardHeader>
-
-            <CardContent>
-              <form
-                onSubmit={handleSubmit(onSubmit)}
-                className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <Field>
-                    <FieldLabel htmlFor="firstName">
-                      First Name
-                    </FieldLabel>
-                    <FieldContent>
-                      <Input
-                        id="firstName"
-                        type="text"
-                        {...register('firstName')}
-                        placeholder="John"
-                      />
-                      <FieldError
-                        errors={
-                          errors.firstName ? [errors.firstName] : []
-                        }
-                      />
-                    </FieldContent>
-                  </Field>
-
-                  <Field>
-                    <FieldLabel htmlFor="lastName">
-                      Last Name
-                    </FieldLabel>
-                    <FieldContent>
-                      <Input
-                        id="lastName"
-                        type="text"
-                        {...register('lastName')}
-                        placeholder="Doe"
-                      />
-                      <FieldError
-                        errors={
-                          errors.lastName ? [errors.lastName] : []
-                        }
-                      />
-                    </FieldContent>
-                  </Field>
-                </div>
-
-                <Field>
-                  <FieldLabel htmlFor="email">Email</FieldLabel>
-                  <FieldContent>
-                    <Input
-                      id="email"
-                      type="email"
-                      {...register('email')}
-                      placeholder="john.doe@example.com"
-                    />
-                    <FieldError
-                      errors={errors.email ? [errors.email] : []}
-                    />
-                  </FieldContent>
-                </Field>
-
-                <Field>
-                  <FieldLabel htmlFor="password">Password</FieldLabel>
-                  <FieldContent>
-                    <Input
-                      id="password"
-                      type="password"
-                      {...register('password')}
-                      placeholder="••••••••"
-                    />
-                    <FieldError
-                      errors={
-                        errors.password ? [errors.password] : []
-                      }
-                    />
-                  </FieldContent>
-                </Field>
-
-                <Field>
-                  <FieldLabel htmlFor="confirmPassword">
-                    Confirm Password
-                  </FieldLabel>
-                  <FieldContent>
-                    <Input
-                      id="confirmPassword"
-                      type="password"
-                      {...register('confirmPassword')}
-                      placeholder="••••••••"
-                    />
-                    <FieldError
-                      errors={
-                        errors.confirmPassword
-                          ? [errors.confirmPassword]
-                          : []
-                      }
-                    />
-                  </FieldContent>
-                </Field>
-
-                <Button
-                  type="submit"
-                  className="w-full"
-                  disabled={isSubmitting}>
-                  {isSubmitting
-                    ? 'Creating account...'
-                    : 'Create account'}
-                </Button>
-              </form>
-            </CardContent>
-
-            <CardFooter className="justify-center">
-              <p className="text-sm text-gray-600">
-                Already have an account?{' '}
-                <Link
-                  href="/signin"
-                  className="font-medium text-blue-600 hover:text-blue-500">
-                  Sign in
-                </Link>
-              </p>
-            </CardFooter>
-          </Card>
         </div>
-      </div>
-    </main>
+      </nav>
+
+      {/* Main Content */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="mb-8">
+          <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+            Upcoming Events
+          </h2>
+          <p className="text-gray-600 dark:text-gray-400">
+            Discover and RSVP to campus events
+          </p>
+        </div>
+
+        {loading ? (
+          <div className="text-center py-12">
+            <p className="text-gray-600 dark:text-gray-400">
+              Loading events...
+            </p>
+          </div>
+        ) : events.length === 0 ? (
+          <div className="text-center py-12">
+            <p className="text-gray-600 dark:text-gray-400">
+              No events available yet.
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {events.map((event) => (
+              <Card
+                key={event.id}
+                className="hover:shadow-lg transition-shadow">
+                <CardHeader>
+                  <CardTitle>{event.title}</CardTitle>
+                  <CardDescription>
+                    Organized by {event.user.name}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      {formatEventDate(
+                        event.startDate,
+                        event.endDate
+                      )}
+                    </p>
+                    {event.description && (
+                      <p className="text-sm line-clamp-3">
+                        {event.description}
+                      </p>
+                    )}
+                    <div className="flex items-center justify-between pt-4">
+                      <span className="text-sm text-gray-600 dark:text-gray-400">
+                        {event.attendeeCount}{' '}
+                        {event.attendeeCount === 1
+                          ? 'attendee'
+                          : 'attendees'}
+                      </span>
+                      <Link href={`/events/${event.id}`}>
+                        <Button size="sm">View Details</Button>
+                      </Link>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
+      </main>
+    </div>
   );
 }
-
-export default SignUp;
