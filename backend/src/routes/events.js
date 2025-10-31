@@ -108,23 +108,23 @@ router.get('/', async (req, res) => {
       ORDER BY e.start_date ASC NULLS LAST
     `);
 
-      const events = result.rows.map((row) => ({
-        id: row.id,
-        title: row.title,
-        description: row.description,
-        startDate: row.start_date,
-        endDate: row.end_date,
-        userId: row.user_id,
-        createdAt: row.createdAt,
-        updatedAt: row.updatedAt,
-        organizer: {
-          id: row.organizer_id,
-          name: row.organizer_name,
-          email: row.organizer_email,
-        },
-        attendeeCount: row.attendee_count,
-        attendees: [], // Will be populated if needed in detail view
-      }));
+    const events = result.rows.map((row) => ({
+      id: row.id,
+      title: row.title,
+      description: row.description,
+      startDate: row.start_date,
+      endDate: row.end_date,
+      userId: row.user_id,
+      createdAt: row.createdAt,
+      updatedAt: row.updatedAt,
+      organizer: {
+        id: row.organizer_id,
+        name: row.organizer_name,
+        email: row.organizer_email,
+      },
+      attendeeCount: row.attendee_count,
+      attendees: [], // Will be populated if needed in detail view
+    }));
 
     res.status(200).json({
       success: true,
