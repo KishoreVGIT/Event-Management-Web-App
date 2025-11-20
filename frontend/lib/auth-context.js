@@ -8,6 +8,7 @@ import {
 } from 'react';
 
 const AuthContext = createContext({});
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
@@ -18,7 +19,7 @@ export function AuthProvider({ children }) {
     const token = localStorage.getItem('token');
     if (token) {
       // Verify token and get user info
-      fetch('http://localhost:4000/api/auth/me', {
+      fetch(`${API_URL}/api/auth/me`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -44,7 +45,7 @@ export function AuthProvider({ children }) {
 
   const signin = async (email, password) => {
     const response = await fetch(
-      'http://localhost:4000/api/auth/signin',
+      `${API_URL}/api/auth/signin`,
       {
         method: 'POST',
         headers: {
@@ -73,7 +74,7 @@ export function AuthProvider({ children }) {
     role = 'student'
   ) => {
     const response = await fetch(
-      'http://localhost:4000/api/auth/signup',
+      `${API_URL}/api/auth/signup`,
       {
         method: 'POST',
         headers: {
