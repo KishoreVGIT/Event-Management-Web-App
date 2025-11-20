@@ -19,6 +19,8 @@ import { FieldLabel, FieldError } from '@/components/ui/field';
 import { DateTimeRangePicker } from '@/components/ui/date-time-range-picker';
 import { useAuth } from '@/lib/auth-context';
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+
 const eventSchema = yup.object().shape({
   title: yup
     .string()
@@ -62,7 +64,7 @@ export default function NewEventPage() {
     try {
       const token = getToken();
       const response = await fetch(
-        'http://localhost:4000/api/events',
+        `${API_URL}/api/events`,
         {
           method: 'POST',
           headers: {

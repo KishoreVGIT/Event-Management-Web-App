@@ -14,6 +14,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useAuth } from '@/lib/auth-context';
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+
 export default function EventsPage() {
   const router = useRouter();
   const { user, signout } = useAuth();
@@ -29,7 +31,7 @@ export default function EventsPage() {
   const fetchEvents = async () => {
     try {
       const response = await fetch(
-        'http://localhost:4000/api/events'
+        `${API_URL}/api/events`
       );
       const data = await response.json();
 

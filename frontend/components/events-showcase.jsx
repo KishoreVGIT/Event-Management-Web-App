@@ -11,6 +11,8 @@ import {
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+
 export function EventsShowcase() {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -21,7 +23,7 @@ export function EventsShowcase() {
 
   const fetchEvents = async () => {
     try {
-      const response = await fetch('http://localhost:4000/api/events');
+      const response = await fetch(`${API_URL}/api/events`);
       const data = await response.json();
 
       if (Array.isArray(data)) {
