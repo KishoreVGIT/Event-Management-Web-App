@@ -19,6 +19,8 @@ import { FieldLabel, FieldError } from '@/components/ui/field';
 import { DateTimeRangePicker } from '@/components/ui/date-time-range-picker';
 import { useAuth } from '@/lib/auth-context';
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+
 const eventSchema = yup.object().shape({
   title: yup
     .string()
@@ -63,7 +65,7 @@ export default function EditEventPage() {
   const fetchEvent = async () => {
     try {
       const response = await fetch(
-        `http://localhost:4000/api/events/${params.id}`
+        `${API_URL}/api/events/${params.id}`
       );
       if (response.ok) {
         const data = await response.json();
@@ -106,7 +108,7 @@ export default function EditEventPage() {
     try {
       const token = getToken();
       const response = await fetch(
-        `http://localhost:4000/api/events/${params.id}`,
+        `${API_URL}/api/events/${params.id}`,
         {
           method: 'PUT',
           headers: {

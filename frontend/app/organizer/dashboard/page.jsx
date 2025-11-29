@@ -13,6 +13,8 @@ import {
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/lib/auth-context';
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+
 export default function OrganizerDashboard() {
   const router = useRouter();
   const { user, signout, loading: authLoading, getToken } = useAuth();
@@ -36,7 +38,7 @@ export default function OrganizerDashboard() {
     try {
       const token = getToken();
       const response = await fetch(
-        'http://localhost:4000/api/events/organizer/my-events',
+        `${API_URL}/api/events/organizer/my-events`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -63,7 +65,7 @@ export default function OrganizerDashboard() {
     try {
       const token = getToken();
       const response = await fetch(
-        `http://localhost:4000/api/events/${eventId}`,
+        `${API_URL}/api/events/${eventId}`,
         {
           method: 'DELETE',
           headers: {
