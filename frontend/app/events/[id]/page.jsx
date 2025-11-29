@@ -13,6 +13,8 @@ import {
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/lib/auth-context';
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+
 export default function EventDetailPage() {
   const router = useRouter();
   const params = useParams();
@@ -34,7 +36,7 @@ export default function EventDetailPage() {
   const fetchEvent = async () => {
     try {
       const response = await fetch(
-        `http://localhost:4000/api/events/${params.id}`
+        `${API_URL}/api/events/${params.id}`
       );
       if (response.ok) {
         const data = await response.json();
@@ -53,7 +55,7 @@ export default function EventDetailPage() {
     try {
       const token = getToken();
       const response = await fetch(
-        `http://localhost:4000/api/rsvp/check/${params.id}`,
+        `${API_URL}/api/rsvp/check/${params.id}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -77,7 +79,7 @@ export default function EventDetailPage() {
     try {
       const token = getToken();
       const response = await fetch(
-        `http://localhost:4000/api/rsvp/${params.id}`,
+        `${API_URL}/api/rsvp/${params.id}`,
         {
           method: 'POST',
           headers: {
@@ -106,7 +108,7 @@ export default function EventDetailPage() {
     try {
       const token = getToken();
       const response = await fetch(
-        `http://localhost:4000/api/rsvp/${params.id}`,
+        `${API_URL}/api/rsvp/${params.id}`,
         {
           method: 'DELETE',
           headers: {
