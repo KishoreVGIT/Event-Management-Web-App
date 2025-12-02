@@ -12,6 +12,7 @@ router.get('/', async (req, res) => {
     const result = await query(`
       SELECT
         e.id, e.title, e.description, e.start_date, e.end_date, e.user_id, e."createdAt", e."updatedAt",
+        e.capacity, e.location, e.category, e.image_url,
         u.id as organizer_id, u.name as organizer_name, u.email as organizer_email,
         COUNT(ea.id)::int as attendee_count
       FROM events e
@@ -27,6 +28,10 @@ router.get('/', async (req, res) => {
       description: row.description,
       startDate: row.start_date,
       endDate: row.end_date,
+      capacity: row.capacity,
+      location: row.location,
+      category: row.category,
+      imageUrl: row.image_url,
       userId: row.user_id,
       createdAt: row.createdAt,
       updatedAt: row.updatedAt,
@@ -54,6 +59,7 @@ router.get('/:id', async (req, res) => {
       `
       SELECT
         e.id, e.title, e.description, e.start_date, e.end_date, e.user_id, e."createdAt", e."updatedAt",
+        e.capacity, e.location, e.category, e.image_url,
         u.id as organizer_id, u.name as organizer_name, u.email as organizer_email
       FROM events e
       JOIN users u ON e.user_id = u.id
@@ -86,6 +92,10 @@ router.get('/:id', async (req, res) => {
       description: eventRow.description,
       startDate: eventRow.start_date,
       endDate: eventRow.end_date,
+      capacity: eventRow.capacity,
+      location: eventRow.location,
+      category: eventRow.category,
+      imageUrl: eventRow.image_url,
       userId: eventRow.user_id,
       createdAt: eventRow.createdAt,
       updatedAt: eventRow.updatedAt,
@@ -123,7 +133,8 @@ router.get(
       const result = await query(
         `
       SELECT
-        e.id, e.title, e.description, e.start_date, e.end_date, e.user_id, e."createdAt", e."updatedAt"
+        e.id, e.title, e.description, e.start_date, e.end_date, e.user_id, e."createdAt", e."updatedAt",
+        e.capacity, e.location, e.category, e.image_url
       FROM events e
       WHERE e.user_id = $1
       ORDER BY e.start_date ASC NULLS LAST
@@ -151,6 +162,10 @@ router.get(
             description: event.description,
             startDate: event.start_date,
             endDate: event.end_date,
+            capacity: event.capacity,
+            location: event.location,
+            category: event.category,
+            imageUrl: event.image_url,
             userId: event.user_id,
             createdAt: event.createdAt,
             updatedAt: event.updatedAt,
@@ -179,23 +194,46 @@ router.get(
 
 router.post('/', authenticate, requireOrganizer, async (req, res) => {
   try {
-    const { title, description, startDate, endDate } = req.body;
+    const {
+      title,
+      description,
+      startDate,
+      endDate,
+      capacity,
+      location,
+      category,
+      imageUrl,
+    } = req.body;
 
     if (!title) {
       return res.status(400).json({ error: 'Title is required' });
     }
 
+    // Validate capacity if provided
+    if (capacity !== null && capacity !== undefined) {
+      const capacityNum = parseInt(capacity);
+      if (isNaN(capacityNum) || capacityNum < 1) {
+        return res
+          .status(400)
+          .json({ error: 'Capacity must be a positive number' });
+      }
+    }
+
     const result = await query(
       `
-      INSERT INTO events (title, description, start_date, end_date, user_id)
-      VALUES ($1, $2, $3, $4, $5)
-      RETURNING id, title, description, start_date, end_date, user_id, "createdAt", "updatedAt"
+      INSERT INTO events (title, description, start_date, end_date, capacity, location, category, image_url, user_id)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+      RETURNING id, title, description, start_date, end_date, capacity, location, category, image_url, user_id, "createdAt", "updatedAt"
     `,
       [
         title,
         description,
         startDate ? new Date(startDate) : null,
         endDate ? new Date(endDate) : null,
+        capacity || null,
+        location || null,
+        category || null,
+        imageUrl || null,
         req.user.userId,
       ]
     );
@@ -213,6 +251,10 @@ router.post('/', authenticate, requireOrganizer, async (req, res) => {
       description: event.description,
       startDate: event.start_date,
       endDate: event.end_date,
+      capacity: event.capacity,
+      location: event.location,
+      category: event.category,
+      imageUrl: event.image_url,
       userId: event.user_id,
       createdAt: event.createdAt,
       updatedAt: event.updatedAt,
@@ -231,7 +273,16 @@ router.put(
   async (req, res) => {
     try {
       const { id } = req.params;
-      const { title, description, startDate, endDate } = req.body;
+      const {
+        title,
+        description,
+        startDate,
+        endDate,
+        capacity,
+        location,
+        category,
+        imageUrl,
+      } = req.body;
 
       const existingEvent = await query(
         'SELECT user_id FROM events WHERE id = $1',
@@ -248,18 +299,32 @@ router.put(
           .json({ error: 'You can only edit your own events' });
       }
 
+      // Validate capacity if provided
+      if (capacity !== null && capacity !== undefined) {
+        const capacityNum = parseInt(capacity);
+        if (isNaN(capacityNum) || capacityNum < 1) {
+          return res
+            .status(400)
+            .json({ error: 'Capacity must be a positive number' });
+        }
+      }
+
       const result = await query(
         `
       UPDATE events
-      SET title = $1, description = $2, start_date = $3, end_date = $4, "updatedAt" = CURRENT_TIMESTAMP
-      WHERE id = $5
-      RETURNING id, title, description, start_date, end_date, user_id, "createdAt", "updatedAt"
+      SET title = $1, description = $2, start_date = $3, end_date = $4, capacity = $5, location = $6, category = $7, image_url = $8, "updatedAt" = CURRENT_TIMESTAMP
+      WHERE id = $9
+      RETURNING id, title, description, start_date, end_date, capacity, location, category, image_url, user_id, "createdAt", "updatedAt"
     `,
         [
           title,
           description,
           startDate ? new Date(startDate) : null,
           endDate ? new Date(endDate) : null,
+          capacity || null,
+          location || null,
+          category || null,
+          imageUrl || null,
           id,
         ]
       );
@@ -289,6 +354,10 @@ router.put(
         description: event.description,
         startDate: event.start_date,
         endDate: event.end_date,
+        capacity: event.capacity,
+        location: event.location,
+        category: event.category,
+        imageUrl: event.image_url,
         userId: event.user_id,
         createdAt: event.createdAt,
         updatedAt: event.updatedAt,
