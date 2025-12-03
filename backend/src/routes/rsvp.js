@@ -10,13 +10,15 @@ router.post('/:eventId', authenticate, async (req, res) => {
     const userId = req.user.userId;
 
     const eventCheck = await query(
-      'SELECT id FROM events WHERE id = $1',
+      'SELECT id, capacity FROM events WHERE id = $1',
       [eventId]
     );
 
     if (eventCheck.rows.length === 0) {
       return res.status(404).json({ error: 'Event not found' });
     }
+
+    const event = eventCheck.rows[0];
 
     const existingRsvp = await query(
       'SELECT id FROM event_attendees WHERE user_id = $1 AND event_id = $2',
@@ -27,6 +29,20 @@ router.post('/:eventId', authenticate, async (req, res) => {
       return res
         .status(400)
         .json({ error: "You have already RSVP'd to this event" });
+    }
+
+    if (event.capacity !== null) {
+      const attendeeCount = await query(
+        'SELECT COUNT(*)::int as count FROM event_attendees WHERE event_id = $1',
+        [eventId]
+      );
+
+      if (attendeeCount.rows[0].count >= event.capacity) {
+        return res.status(400).json({
+          error: 'This event is at full capacity',
+          isFull: true,
+        });
+      }
     }
 
     const result = await query(
@@ -43,7 +59,7 @@ router.post('/:eventId', authenticate, async (req, res) => {
     const eventResult = await query(
       `
       SELECT
-        e.id, e.title, e.description, e.start_date, e.end_date, e.user_id,
+        e.id, e.title, e.description, e.start_date, e.end_date, e.capacity, e.location, e.category, e.image_url, e.user_id,
         u.id as organizer_id, u.name as organizer_name, u.email as organizer_email
       FROM events e
       JOIN users u ON e.user_id = u.id
@@ -65,6 +81,10 @@ router.post('/:eventId', authenticate, async (req, res) => {
           description: eventResult.rows[0].description,
           startDate: eventResult.rows[0].start_date,
           endDate: eventResult.rows[0].end_date,
+          capacity: eventResult.rows[0].capacity,
+          location: eventResult.rows[0].location,
+          category: eventResult.rows[0].category,
+          imageUrl: eventResult.rows[0].image_url,
           userId: eventResult.rows[0].user_id,
           user: {
             id: eventResult.rows[0].organizer_id,
@@ -113,7 +133,7 @@ router.get('/my-rsvps', authenticate, async (req, res) => {
       `
       SELECT
         ea.id, ea.user_id, ea.event_id, ea.status,
-        e.id as event_id, e.title, e.description, e.start_date, e.end_date, e.user_id as organizer_id,
+        e.id as event_id, e.title, e.description, e.start_date, e.end_date, e.capacity, e.location, e.category, e.image_url, e.user_id as organizer_id,
         u.id as org_id, u.name as org_name, u.email as org_email,
         (SELECT COUNT(*)::int FROM event_attendees WHERE event_id = e.id) as attendee_count
       FROM event_attendees ea
@@ -136,6 +156,10 @@ router.get('/my-rsvps', authenticate, async (req, res) => {
         description: row.description,
         startDate: row.start_date,
         endDate: row.end_date,
+        capacity: row.capacity,
+        location: row.location,
+        category: row.category,
+        imageUrl: row.image_url,
         userId: row.organizer_id,
         user: {
           id: row.org_id,
