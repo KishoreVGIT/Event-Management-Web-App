@@ -1,6 +1,7 @@
 import express from 'express';
 import { query } from '../db.js';
 import { authenticate } from '../middleware/auth.js';
+import { sendRsvpConfirmationEmail } from '../services/email.js';
 
 const router = express.Router();
 
@@ -9,6 +10,7 @@ router.post('/:eventId', authenticate, async (req, res) => {
     const { eventId } = req.params;
     const userId = req.user.userId;
 
+    // Check if event exists and get capacity info
     const eventCheck = await query(
       'SELECT id, capacity FROM events WHERE id = $1',
       [eventId]
@@ -20,6 +22,7 @@ router.post('/:eventId', authenticate, async (req, res) => {
 
     const event = eventCheck.rows[0];
 
+    // Check if user already has an RSVP
     const existingRsvp = await query(
       'SELECT id FROM event_attendees WHERE user_id = $1 AND event_id = $2',
       [userId, eventId]
@@ -31,6 +34,7 @@ router.post('/:eventId', authenticate, async (req, res) => {
         .json({ error: "You have already RSVP'd to this event" });
     }
 
+    // Check capacity if set
     if (event.capacity !== null) {
       const attendeeCount = await query(
         'SELECT COUNT(*)::int as count FROM event_attendees WHERE event_id = $1',
@@ -38,10 +42,9 @@ router.post('/:eventId', authenticate, async (req, res) => {
       );
 
       if (attendeeCount.rows[0].count >= event.capacity) {
-        return res.status(400).json({
-          error: 'This event is at full capacity',
-          isFull: true,
-        });
+        return res
+          .status(400)
+          .json({ error: 'This event is at full capacity', isFull: true });
       }
     }
 
@@ -67,6 +70,26 @@ router.post('/:eventId', authenticate, async (req, res) => {
     `,
       [eventId]
     );
+
+    // Send confirmation email (don't wait for it)
+    const eventData = {
+      id: eventResult.rows[0].id,
+      title: eventResult.rows[0].title,
+      description: eventResult.rows[0].description,
+      startDate: eventResult.rows[0].start_date,
+      endDate: eventResult.rows[0].end_date,
+      location: eventResult.rows[0].location,
+      category: eventResult.rows[0].category,
+    };
+
+    const userData = {
+      name: req.user.name,
+      email: req.user.email,
+    };
+
+    sendRsvpConfirmationEmail(userData, eventData).catch(err => {
+      console.error('Failed to send RSVP confirmation email:', err);
+    });
 
     res.status(201).json({
       message: 'RSVP successful',
@@ -206,3 +229,4 @@ router.get('/check/:eventId', authenticate, async (req, res) => {
 });
 
 export default router;
+git add

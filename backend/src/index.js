@@ -6,6 +6,8 @@ import pool, { end } from './db.js';
 import authRoutes from './routes/auth.js';
 import eventRoutes from './routes/events.js';
 import rsvpRoutes from './routes/rsvp.js';
+import adminRoutes from './routes/admin.js';
+import uploadRoutes from './routes/upload.js';
 
 dotenv.config();
 
@@ -30,6 +32,8 @@ app.get('/', (_req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/events', eventRoutes);
 app.use('/api/rsvp', rsvpRoutes);
+app.use('/api/admin', adminRoutes);
+app.use('/api/upload', uploadRoutes);
 
 async function startServer() {
   try {
