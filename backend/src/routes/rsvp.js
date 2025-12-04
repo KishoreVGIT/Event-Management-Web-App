@@ -229,4 +229,3 @@ router.get('/check/:eventId', authenticate, async (req, res) => {
 });
 
 export default router;
-git add
