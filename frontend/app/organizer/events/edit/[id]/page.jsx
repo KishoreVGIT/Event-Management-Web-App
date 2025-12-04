@@ -17,6 +17,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { FieldLabel, FieldError } from '@/components/ui/field';
 import { DateTimeRangePicker } from '@/components/ui/date-time-range-picker';
+import { ImageUpload } from '@/components/ui/image-upload';
 import { useAuth } from '@/lib/auth-context';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
@@ -29,6 +30,17 @@ const eventSchema = yup.object().shape({
   description: yup.string(),
   startDate: yup.string().required('Start date is required'),
   endDate: yup.string().nullable(),
+  capacity: yup
+    .number()
+    .nullable()
+    .transform((value, originalValue) =>
+      originalValue === '' ? null : value
+    )
+    .positive('Capacity must be a positive number')
+    .integer('Capacity must be a whole number'),
+  location: yup.string().max(500, 'Location must be less than 500 characters'),
+  category: yup.string().max(100, 'Category must be less than 100 characters'),
+  imageUrl: yup.string().url('Must be a valid URL'),
 });
 
 export default function EditEventPage() {
@@ -44,10 +56,13 @@ export default function EditEventPage() {
     handleSubmit,
     control,
     setValue,
+    watch,
     formState: { errors },
   } = useForm({
     resolver: yupResolver(eventSchema),
   });
+
+  const imageUrl = watch('imageUrl');
 
   useEffect(() => {
     if (!authLoading) {
@@ -78,6 +93,10 @@ export default function EditEventPage() {
 
         setValue('title', data.title);
         setValue('description', data.description || '');
+        setValue('location', data.location || '');
+        setValue('capacity', data.capacity || '');
+        setValue('category', data.category || '');
+        setValue('imageUrl', data.imageUrl || '');
 
         if (data.startDate) {
           setValue(
@@ -226,6 +245,71 @@ export default function EditEventPage() {
                   />
                 )}
               />
+
+              <div>
+                <FieldLabel htmlFor="location">
+                  Location/Venue
+                </FieldLabel>
+                <Input
+                  id="location"
+                  type="text"
+                  placeholder="Enter event location"
+                  {...register('location')}
+                />
+                {errors.location && (
+                  <FieldError>{errors.location.message}</FieldError>
+                )}
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <FieldLabel htmlFor="capacity">
+                    Capacity (Optional)
+                  </FieldLabel>
+                  <Input
+                    id="capacity"
+                    type="number"
+                    min="1"
+                    placeholder="Max attendees"
+                    {...register('capacity')}
+                  />
+                  {errors.capacity && (
+                    <FieldError>{errors.capacity.message}</FieldError>
+                  )}
+                  <p className="text-xs text-gray-500 mt-1">
+                    Leave empty for unlimited capacity
+                  </p>
+                </div>
+
+                <div>
+                  <FieldLabel htmlFor="category">
+                    Category (Optional)
+                  </FieldLabel>
+                  <Input
+                    id="category"
+                    type="text"
+                    placeholder="e.g., Workshop, Social"
+                    {...register('category')}
+                  />
+                  {errors.category && (
+                    <FieldError>{errors.category.message}</FieldError>
+                  )}
+                </div>
+              </div>
+
+              <div>
+                <FieldLabel htmlFor="imageUrl">
+                  Event Image (Optional)
+                </FieldLabel>
+                <ImageUpload
+                  value={imageUrl || ''}
+                  onChange={(url) => setValue('imageUrl', url)}
+                  disabled={loading}
+                />
+                {errors.imageUrl && (
+                  <FieldError>{errors.imageUrl.message}</FieldError>
+                )}
+              </div>
 
               <div className="flex space-x-4">
                 <Button
