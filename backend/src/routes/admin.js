@@ -211,42 +211,68 @@ router.delete('/events/:id', authenticate, requireAdmin, async (req, res) => {
 // Get system statistics (admin only)
 router.get('/stats', authenticate, requireAdmin, async (req, res) => {
   try {
+    // Total counts
     const totalUsersResult = await query('SELECT COUNT(*)::int as count FROM users');
-    const totalEventsResult = await query('SELECT COUNT(*)::int as count FROM events');
-    const totalRsvpsResult = await query('SELECT COUNT(*)::int as count FROM event_attendees');
+    const totalEventsResult = await query('SELECT COUNT(*)::int as count FROM events WHERE status != $1', ['deleted']);
+    const totalRsvpsResult = await query('SELECT COUNT(*)::int as count FROM rsvps');
 
+    // Users by role
     const usersByRoleResult = await query(`
       SELECT role, COUNT(*)::int as count
       FROM users
       GROUP BY role
+      ORDER BY count DESC
     `);
 
+    // Events by status
+    const eventsByStatusResult = await query(`
+      SELECT status, COUNT(*)::int as count
+      FROM events
+      GROUP BY status
+      ORDER BY count DESC
+    `);
+
+    // Recent users
     const recentUsersResult = await query(`
-      SELECT id, name, email, role, "createdAt"
+      SELECT id, name, email, role, created_at
       FROM users
-      ORDER BY "createdAt" DESC
+      ORDER BY created_at DESC
       LIMIT 10
     `);
 
+    // Upcoming events
     const upcomingEventsResult = await query(`
-      SELECT e.id, e.title, e.start_date, e.end_date,
+      SELECT e.id, e.title, e.start_date, e.end_date, e.status,
              u.name as organizer_name,
-             COUNT(ea.id)::int as attendee_count
+             COUNT(r.id)::int as attendee_count
       FROM events e
-      JOIN users u ON e.user_id = u.id
-      LEFT JOIN event_attendees ea ON e.id = ea.event_id
-      WHERE e.start_date > NOW()
+      JOIN users u ON e.organizer_id = u.id
+      LEFT JOIN rsvps r ON e.id = r.event_id
+      WHERE e.start_date > NOW() AND e.status = 'active'
       GROUP BY e.id, u.name
       ORDER BY e.start_date ASC
       LIMIT 10
     `);
 
+    // Events by category
     const eventsByCategoryResult = await query(`
       SELECT category, COUNT(*)::int as count
       FROM events
-      WHERE category IS NOT NULL
+      WHERE category IS NOT NULL AND status != 'deleted'
       GROUP BY category
       ORDER BY count DESC
+    `);
+
+    // Recent RSVPs
+    const recentRsvpsResult = await query(`
+      SELECT r.id, r.rsvp_date,
+             u.name as user_name,
+             e.title as event_title
+      FROM rsvps r
+      JOIN users u ON r.user_id = u.id
+      JOIN events e ON r.event_id = e.id
+      ORDER BY r.rsvp_date DESC
+      LIMIT 10
     `);
 
     res.json({
@@ -256,9 +282,30 @@ router.get('/stats', authenticate, requireAdmin, async (req, res) => {
         rsvps: totalRsvpsResult.rows[0].count,
       },
       usersByRole: usersByRoleResult.rows,
-      recentUsers: recentUsersResult.rows,
-      upcomingEvents: upcomingEventsResult.rows,
+      eventsByStatus: eventsByStatusResult.rows,
+      recentUsers: recentUsersResult.rows.map(row => ({
+        id: row.id,
+        name: row.name,
+        email: row.email,
+        role: row.role,
+        createdAt: row.created_at
+      })),
+      upcomingEvents: upcomingEventsResult.rows.map(row => ({
+        id: row.id,
+        title: row.title,
+        startDate: row.start_date,
+        endDate: row.end_date,
+        status: row.status,
+        organizerName: row.organizer_name,
+        attendeeCount: row.attendee_count
+      })),
       eventsByCategory: eventsByCategoryResult.rows,
+      recentRsvps: recentRsvpsResult.rows.map(row => ({
+        id: row.id,
+        rsvpDate: row.rsvp_date,
+        userName: row.user_name,
+        eventTitle: row.event_title
+      }))
     });
   } catch (error) {
     console.error('Error fetching stats:', error);

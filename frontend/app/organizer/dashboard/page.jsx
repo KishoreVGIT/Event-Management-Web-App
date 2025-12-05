@@ -200,6 +200,9 @@ export default function OrganizerDashboard() {
               <Link href="/events">
                 <Button variant="outline">View All Events</Button>
               </Link>
+              <Link href="/profile">
+                <Button variant="outline">Profile</Button>
+              </Link>
               <Button variant="outline" onClick={handleSignOut}>
                 Sign Out
               </Button>

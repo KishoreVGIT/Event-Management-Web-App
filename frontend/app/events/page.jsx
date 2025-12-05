@@ -296,6 +296,19 @@ export default function EventsPage() {
                       Dashboard
                     </Button>
                   )}
+                  {user.role === 'admin' && (
+                    <Button
+                      onClick={() =>
+                        router.push('/admin/dashboard')
+                      }>
+                      Admin
+                    </Button>
+                  )}
+                  <Button
+                    variant="outline"
+                    onClick={() => router.push('/profile')}>
+                    Profile
+                  </Button>
                   <Button variant="outline" onClick={handleSignOut}>
                     Sign Out
                   </Button>

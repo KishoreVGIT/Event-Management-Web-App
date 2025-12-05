@@ -11,6 +11,7 @@ import eventRoutes from './routes/events.js';
 import rsvpRoutes from './routes/rsvp.js';
 import adminRoutes from './routes/admin.js';
 import uploadRoutes from './routes/upload.js';
+import profileRoutes from './routes/profile.js';
 import { apiLimiter } from './middleware/rate-limit.js';
 
 const app = express();
@@ -39,6 +40,7 @@ app.use('/api/events', eventRoutes);
 app.use('/api/rsvp', rsvpRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/upload', uploadRoutes);
+app.use('/api/profile', profileRoutes);
 
 async function startServer() {
   try {
