@@ -91,36 +91,63 @@ function SignUp() {
   };
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <main className="min-h-screen flex items-center justify-center bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800 py-12 px-4 sm:px-6 lg:px-8">
       <div className="w-full max-w-4xl">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+        <div className="text-center mb-8">
+          <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">
+            Join Campus Connect
+          </h1>
+          <p className="text-gray-600 dark:text-gray-400">
+            Create your account and start discovering amazing events
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
           <div className="hidden md:block">
-            <div className="relative h-96 w-full rounded-lg overflow-hidden">
-              <Image
-                src={img}
-                alt="Event management illustration"
-                fill
-                className="object-cover"
-              />
+            <div className="sticky top-8">
+              <div className="relative h-96 w-full rounded-2xl overflow-hidden shadow-xl">
+                <Image
+                  src={img}
+                  alt="Event management illustration"
+                  fill
+                  className="object-cover"
+                />
+              </div>
+              <div className="mt-6 p-6 bg-blue-50 dark:bg-blue-900/20 rounded-2xl border border-blue-100 dark:border-blue-800">
+                <h3 className="font-semibold text-gray-900 dark:text-white mb-2">
+                  Why join Campus Connect?
+                </h3>
+                <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+                  <li className="flex items-center gap-2">
+                    <svg className="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                    </svg>
+                    Discover campus events instantly
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <svg className="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                    </svg>
+                    Easy RSVP and notifications
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <svg className="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                    </svg>
+                    Connect with your community
+                  </li>
+                </ul>
+              </div>
             </div>
           </div>
 
-          <Card className="w-full max-w-md mx-auto">
-            <CardHeader className="text-center">
-              <CardTitle className="text-2xl font-bold">
-                Create your account
-              </CardTitle>
-              <CardDescription>
-                Enter your details to create a new account
-              </CardDescription>
-            </CardHeader>
-
-            <CardContent>
+          <Card className="w-full shadow-xl border-2">
+            <CardContent className="pt-6">
               <form
                 onSubmit={handleSubmit(onSubmit)}
                 className="space-y-4">
                 {error && (
-                  <div className="p-3 text-sm text-red-600 bg-red-50 dark:bg-red-900/20 rounded-md">
+                  <div className="p-4 text-sm text-red-600 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
                     {error}
                   </div>
                 )}
@@ -327,23 +354,29 @@ function SignUp() {
 
                 <Button
                   type="submit"
-                  className="w-full"
+                  className="w-full h-12 text-base bg-blue-600 hover:bg-blue-700 mt-6"
                   disabled={loading}>
-                  {loading ? 'Creating account...' : 'Create account'}
+                  {loading ? 'Creating account...' : 'Create Account'}
                 </Button>
+
+                <div className="relative my-6">
+                  <div className="absolute inset-0 flex items-center">
+                    <div className="w-full border-t border-gray-300 dark:border-gray-700"></div>
+                  </div>
+                  <div className="relative flex justify-center text-sm">
+                    <span className="px-2 bg-white dark:bg-gray-800 text-gray-500">
+                      Already have an account?
+                    </span>
+                  </div>
+                </div>
+
+                <Link href="/signin">
+                  <Button variant="outline" className="w-full h-12 text-base border-2">
+                    Sign In
+                  </Button>
+                </Link>
               </form>
             </CardContent>
-
-            <CardFooter className="justify-center">
-              <p className="text-sm text-gray-600">
-                Already have an account?{' '}
-                <Link
-                  href="/signin"
-                  className="font-medium text-blue-600 hover:text-blue-500">
-                  Sign in
-                </Link>
-              </p>
-            </CardFooter>
           </Card>
         </div>
       </div>
