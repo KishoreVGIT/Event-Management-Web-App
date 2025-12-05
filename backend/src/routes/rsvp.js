@@ -1,54 +1,64 @@
 import express from 'express';
-import { query } from '../db.js';
+import { query, getClient } from '../db.js';
 import { authenticate } from '../middleware/auth.js';
 import { sendRsvpConfirmationEmail } from '../services/email.js';
+import { rsvpLimiter } from '../middleware/rate-limit.js';
 
 const router = express.Router();
 
-router.post('/:eventId', authenticate, async (req, res) => {
+router.post('/:eventId', authenticate, rsvpLimiter, async (req, res) => {
+  const client = await getClient();
+  
   try {
     const { eventId } = req.params;
     const userId = req.user.userId;
 
-    // Check if event exists and get capacity info
-    const eventCheck = await query(
-      'SELECT id, capacity FROM events WHERE id = $1',
+    // Start transaction
+    await client.query('BEGIN');
+
+    // Check if event exists and get capacity info (with row lock)
+    const eventCheck = await client.query(
+      'SELECT id, capacity FROM events WHERE id = $1 FOR UPDATE',
       [eventId]
     );
 
     if (eventCheck.rows.length === 0) {
+      await client.query('ROLLBACK');
       return res.status(404).json({ error: 'Event not found' });
     }
 
     const event = eventCheck.rows[0];
 
     // Check if user already has an RSVP
-    const existingRsvp = await query(
+    const existingRsvp = await client.query(
       'SELECT id FROM event_attendees WHERE user_id = $1 AND event_id = $2',
       [userId, eventId]
     );
 
     if (existingRsvp.rows.length > 0) {
+      await client.query('ROLLBACK');
       return res
         .status(400)
         .json({ error: "You have already RSVP'd to this event" });
     }
 
-    // Check capacity if set
+    // Check capacity if set (atomic check within transaction)
     if (event.capacity !== null) {
-      const attendeeCount = await query(
+      const attendeeCount = await client.query(
         'SELECT COUNT(*)::int as count FROM event_attendees WHERE event_id = $1',
         [eventId]
       );
 
       if (attendeeCount.rows[0].count >= event.capacity) {
+        await client.query('ROLLBACK');
         return res
           .status(400)
           .json({ error: 'This event is at full capacity', isFull: true });
       }
     }
 
-    const result = await query(
+    // Insert RSVP
+    const result = await client.query(
       `
       INSERT INTO event_attendees (user_id, event_id, status)
       VALUES ($1, $2, $3)
@@ -59,7 +69,8 @@ router.post('/:eventId', authenticate, async (req, res) => {
 
     const rsvp = result.rows[0];
 
-    const eventResult = await query(
+    // Get event details for response
+    const eventResult = await client.query(
       `
       SELECT
         e.id, e.title, e.description, e.start_date, e.end_date, e.capacity, e.location, e.category, e.image_url, e.user_id,
@@ -71,7 +82,10 @@ router.post('/:eventId', authenticate, async (req, res) => {
       [eventId]
     );
 
-    // Send confirmation email (don't wait for it)
+    // Commit transaction
+    await client.query('COMMIT');
+
+    // Send confirmation email (don't wait for it - outside transaction)
     const eventData = {
       id: eventResult.rows[0].id,
       title: eventResult.rows[0].title,
@@ -118,12 +132,17 @@ router.post('/:eventId', authenticate, async (req, res) => {
       },
     });
   } catch (error) {
+    // Rollback transaction on error
+    await client.query('ROLLBACK');
     console.error('Error creating RSVP:', error);
     res.status(500).json({ error: 'Failed to RSVP to event' });
+  } finally {
+    // Always release the client back to the pool
+    client.release();
   }
 });
 
-router.delete('/:eventId', authenticate, async (req, res) => {
+router.delete('/:eventId', authenticate, rsvpLimiter, async (req, res) => {
   try {
     const { eventId } = req.params;
     const userId = req.user.userId;
