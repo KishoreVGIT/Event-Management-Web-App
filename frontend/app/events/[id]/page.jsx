@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/lib/auth-context';
+import { useAuth } from '@/lib/auth-context';
 import { AddToCalendar } from '@/components/add-to-calendar';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
@@ -315,6 +316,7 @@ export default function EventDetailPage() {
             </div>
 
             <div className="pt-4 flex flex-col sm:flex-row gap-3">
+
               {user ? (
                 hasRsvp ? (
                   <Button
@@ -350,7 +352,6 @@ export default function EventDetailPage() {
                   </Link>
                 </div>
               )}
-
               <AddToCalendar event={event} />
             </div>
           </CardContent>
