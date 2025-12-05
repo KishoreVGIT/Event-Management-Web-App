@@ -2,13 +2,14 @@ import express from 'express';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { query } from '../db.js';
+import { authLimiter } from '../middleware/rate-limit.js';
 
 const router = express.Router();
 
 const JWT_SECRET =
   process.env.JWT_SECRET || 'your-secret-key-change-this';
 
-router.post('/signup', async (req, res) => {
+router.post('/signup', authLimiter, async (req, res) => {
   try {
     const { firstName, lastName, email, password, role } = req.body;
 
@@ -65,7 +66,7 @@ router.post('/signup', async (req, res) => {
   }
 });
 
-router.post('/signin', async (req, res) => {
+router.post('/signin', authLimiter, async (req, res) => {
   try {
     const { email, password } = req.body;
 

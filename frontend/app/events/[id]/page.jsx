@@ -263,14 +263,38 @@ export default function EventDetailPage() {
               </div>
             )}
 
+            {event.location && (
+              <div>
+                <h3 className="text-lg font-semibold mb-2">Location</h3>
+                <p className="text-gray-700 dark:text-gray-300">
+                  {event.location}
+                </p>
+              </div>
+            )}
+
+            {event.category && (
+              <div>
+                <h3 className="text-lg font-semibold mb-2">Category</h3>
+                <p className="text-gray-700 dark:text-gray-300">
+                  {event.category}
+                </p>
+              </div>
+            )}
+
             <div>
               <h3 className="text-lg font-semibold mb-2">
                 Attendees
               </h3>
               <p className="text-gray-700 dark:text-gray-300 mb-4">
                 {event.attendeeCount}{' '}
+                {event.capacity ? `/ ${event.capacity}` : ''}{' '}
                 {event.attendeeCount === 1 ? 'person' : 'people'}{' '}
                 attending
+                {event.capacity && event.attendeeCount >= event.capacity && (
+                  <span className="ml-2 text-red-600 font-semibold">
+                    (Full)
+                  </span>
+                )}
               </p>
 
               {event.attendees && event.attendees.length > 0 && (
@@ -301,6 +325,12 @@ export default function EventDetailPage() {
                     disabled={rsvpLoading}
                     className="w-full sm:w-auto">
                     {rsvpLoading ? 'Cancelling...' : 'Cancel RSVP'}
+                  </Button>
+                ) : event.capacity && event.attendeeCount >= event.capacity ? (
+                  <Button
+                    disabled
+                    className="w-full sm:w-auto">
+                    Event Full
                   </Button>
                 ) : (
                   <Button

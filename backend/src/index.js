@@ -8,6 +8,7 @@ import eventRoutes from './routes/events.js';
 import rsvpRoutes from './routes/rsvp.js';
 import adminRoutes from './routes/admin.js';
 import uploadRoutes from './routes/upload.js';
+import { apiLimiter } from './middleware/rate-limit.js';
 
 dotenv.config();
 
@@ -18,6 +19,9 @@ app.use(helmet());
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Apply general rate limiting to all API routes
+app.use('/api/', apiLimiter);
 
 app.get('/health', (_req, res) => {
   res
