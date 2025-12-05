@@ -1,10 +1,25 @@
 import pg from 'pg';
+import dotenv from 'dotenv';
+
+// Load environment variables FIRST
+dotenv.config();
+
 const { Pool } = pg;
 
+// Debug: Log which database we're connecting to
+console.log(
+  '🔍 DATABASE_URL:',
+  process.env.DATABASE_URL
+    ? process.env.DATABASE_URL.includes('neon.tech')
+      ? 'Neon Cloud ✅'
+      : process.env.DATABASE_URL
+    : 'Local fallback ❌'
+);
+
 const pool = new Pool({
-  connectionString:
-    process.env.DATABASE_URL ||
-    'postgresql://postgres:password@localhost:5432/event_management',
+  connectionString: process.env.DATABASE_URL,
+  // ||
+  // 'postgresql://neondb_owner:npg_DIF3yHVxG1dL@ep-cool-cell-ahki4eba-pooler.c-3.us-east-1.aws.neon.tech/neondb?sslmode=require'
   max: 20,
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 2000,

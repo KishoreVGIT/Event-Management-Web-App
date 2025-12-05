@@ -54,8 +54,12 @@ export function DateTimeRangePicker({
       const end = new Date(endValue)
       start.setHours(0, 0, 0, 0)
       end.setHours(0, 0, 0, 0)
+      // Only auto-check if dates are different AND user hasn't manually toggled
       if (end > start) {
         setIsMultiDay(true)
+      } else if (end.getTime() === start.getTime() && isMultiDay) {
+        // Auto-uncheck if dates become the same
+        setIsMultiDay(false)
       }
     }
   }, [startValue, endValue])
@@ -82,7 +86,15 @@ export function DateTimeRangePicker({
     // If not multi-day and no end time set, set end time to same day
     if (!isMultiDay && !endValue) {
       const endDateTime = new Date(newDate)
-      endDateTime.setHours(newDate.getHours() + 1) // Default 1 hour duration
+      const proposedEndHour = newDate.getHours() + 1
+
+      // Make sure end time stays on same day
+      if (proposedEndHour >= 24) {
+        endDateTime.setHours(23, 59, 0, 0)
+      } else {
+        endDateTime.setHours(proposedEndHour)
+      }
+
       onEndChange(endDateTime.toISOString())
     }
 
@@ -227,6 +239,10 @@ export function DateTimeRangePicker({
 
       {startError && (
         <p className="text-sm text-red-600 dark:text-red-400">{startError}</p>
+      )}
+
+      {endError && !isMultiDay && (
+        <p className="text-sm text-red-600 dark:text-red-400">{endError}</p>
       )}
 
       {/* Multi-day Event Toggle */}

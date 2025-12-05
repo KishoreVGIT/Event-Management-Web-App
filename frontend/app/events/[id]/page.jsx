@@ -12,7 +12,6 @@ import {
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/lib/auth-context';
-import { useAuth } from '@/lib/auth-context';
 import { AddToCalendar } from '@/components/add-to-calendar';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
@@ -236,6 +235,15 @@ export default function EventDetailPage() {
 
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Card>
+          {event.imageUrl && (
+            <div className="w-full h-80 overflow-hidden rounded-t-lg">
+              <img
+                src={event.imageUrl}
+                alt={event.title}
+                className="w-full h-full object-cover"
+              />
+            </div>
+          )}
           <CardHeader>
             <CardTitle className="text-3xl">{event.title}</CardTitle>
             <CardDescription>

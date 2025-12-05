@@ -10,16 +10,27 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { useAuth } from '@/lib/auth-context';
+import { toast } from 'sonner';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 
 export function EventsShowcase() {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [rsvpStatus, setRsvpStatus] = useState({});
+  const [rsvpLoading, setRsvpLoading] = useState({});
+  const { user, getToken } = useAuth();
 
   useEffect(() => {
     fetchEvents();
   }, []);
+
+  useEffect(() => {
+    if (user && events.length > 0) {
+      checkRsvpStatus();
+    }
+  }, [user, events]);
 
   const fetchEvents = async () => {
     try {
@@ -37,6 +48,111 @@ export function EventsShowcase() {
       setEvents([]);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const checkRsvpStatus = async () => {
+    if (!user) return;
+
+    const token = getToken();
+    if (!token) return;
+
+    const statusChecks = events.slice(0, 6).map(async (event) => {
+      try {
+        const response = await fetch(
+          `${API_URL}/api/rsvp/check/${event.id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        if (response.ok) {
+          const data = await response.json();
+          return { eventId: event.id, hasRsvp: data.hasRsvp };
+        }
+      } catch (error) {
+        console.error(`Error checking RSVP for event ${event.id}:`, error);
+      }
+      return { eventId: event.id, hasRsvp: false };
+    });
+
+    const results = await Promise.all(statusChecks);
+    const statusMap = {};
+    results.forEach((result) => {
+      statusMap[result.eventId] = result.hasRsvp;
+    });
+    setRsvpStatus(statusMap);
+  };
+
+  const handleRsvp = async (eventId) => {
+    if (!user) {
+      toast.error('Please sign in to RSVP');
+      return;
+    }
+
+    const token = getToken();
+    if (!token) {
+      toast.error('Please sign in to RSVP');
+      return;
+    }
+
+    setRsvpLoading((prev) => ({ ...prev, [eventId]: true }));
+
+    try {
+      const response = await fetch(`${API_URL}/api/rsvp/${eventId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        toast.success('RSVP successful!');
+        setRsvpStatus((prev) => ({ ...prev, [eventId]: true }));
+        fetchEvents(); // Refresh to update attendee count
+      } else {
+        toast.error(data.error || 'Failed to RSVP');
+      }
+    } catch (error) {
+      console.error('Error RSVPing:', error);
+      toast.error('Failed to RSVP. Please try again.');
+    } finally {
+      setRsvpLoading((prev) => ({ ...prev, [eventId]: false }));
+    }
+  };
+
+  const handleCancelRsvp = async (eventId) => {
+    const token = getToken();
+    if (!token) return;
+
+    setRsvpLoading((prev) => ({ ...prev, [eventId]: true }));
+
+    try {
+      const response = await fetch(`${API_URL}/api/rsvp/${eventId}`, {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        toast.success('RSVP cancelled');
+        setRsvpStatus((prev) => ({ ...prev, [eventId]: false }));
+        fetchEvents(); // Refresh to update attendee count
+      } else {
+        const data = await response.json();
+        toast.error(data.error || 'Failed to cancel RSVP');
+      }
+    } catch (error) {
+      console.error('Error cancelling RSVP:', error);
+      toast.error('Failed to cancel RSVP');
+    } finally {
+      setRsvpLoading((prev) => ({ ...prev, [eventId]: false }));
     }
   };
 
@@ -122,7 +238,16 @@ export function EventsShowcase() {
         return (
           <Card
             key={event.id}
-            className="hover:shadow-lg transition-all duration-200 hover:-translate-y-1">
+            className="hover:shadow-lg transition-all duration-200 hover:-translate-y-1 overflow-hidden">
+            {event.imageUrl && (
+              <div className="w-full h-48 overflow-hidden">
+                <img
+                  src={event.imageUrl}
+                  alt={event.title}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            )}
             <CardHeader>
               <div className="flex items-start justify-between">
                 <div className="flex-1">
@@ -183,11 +308,32 @@ export function EventsShowcase() {
                     </svg>
                     {event.attendeeCount}
                   </div>
-                  <Link href={`/events/${event.id}`}>
-                    <Button size="sm" variant="default">
-                      View Event
-                    </Button>
-                  </Link>
+                  <div className="flex gap-2">
+                    {user && user.role === 'student' && (
+                      rsvpStatus[event.id] ? (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleCancelRsvp(event.id)}
+                          disabled={rsvpLoading[event.id]}>
+                          {rsvpLoading[event.id] ? 'Cancelling...' : 'Cancel RSVP'}
+                        </Button>
+                      ) : (
+                        <Button
+                          size="sm"
+                          variant="default"
+                          onClick={() => handleRsvp(event.id)}
+                          disabled={rsvpLoading[event.id]}>
+                          {rsvpLoading[event.id] ? 'RSVPing...' : 'RSVP'}
+                        </Button>
+                      )
+                    )}
+                    <Link href={`/events/${event.id}`}>
+                      <Button size="sm" variant="outline">
+                        View
+                      </Button>
+                    </Link>
+                  </div>
                 </div>
               </div>
             </CardContent>

@@ -12,6 +12,8 @@ import {
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/lib/auth-context';
+import { PostponeEventDialog } from '@/components/postpone-event-dialog';
+import { CancelEventDialog } from '@/components/cancel-event-dialog';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 
@@ -20,6 +22,9 @@ export default function OrganizerDashboard() {
   const { user, signout, loading: authLoading, getToken } = useAuth();
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [postponeDialogOpen, setPostponeDialogOpen] = useState(false);
+  const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
+  const [selectedEvent, setSelectedEvent] = useState(null);
 
   useEffect(() => {
     if (!authLoading) {
@@ -57,25 +62,52 @@ export default function OrganizerDashboard() {
     }
   };
 
-  const handleDelete = async (eventId) => {
-    if (!confirm('Are you sure you want to delete this event?')) {
+  const handlePostpone = (event) => {
+    setSelectedEvent(event);
+    setPostponeDialogOpen(true);
+  };
+
+  const handleCancelEvent = (event) => {
+    setSelectedEvent(event);
+    setCancelDialogOpen(true);
+  };
+
+  const handlePostponeSuccess = (result) => {
+    alert(`Event postponed successfully! ${result.emailsSent} attendees notified.`);
+    fetchMyEvents(); // Refresh events
+  };
+
+  const handleCancelSuccess = (result) => {
+    alert(`Event cancelled successfully! ${result.emailsSent} attendees notified.`);
+    fetchMyEvents(); // Refresh events
+  };
+
+  const handleDelete = async (eventId, eventTitle, eventStatus) => {
+    if (eventStatus !== 'cancelled') {
+      alert('Please cancel the event first before deleting it.');
+      return;
+    }
+
+    if (
+      !confirm(
+        `Are you sure you want to permanently delete "${eventTitle}"? This action cannot be undone.`
+      )
+    ) {
       return;
     }
 
     try {
       const token = getToken();
-      const response = await fetch(
-        `${API_URL}/api/events/${eventId}`,
-        {
-          method: 'DELETE',
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const response = await fetch(`${API_URL}/api/events/${eventId}`, {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
       if (response.ok) {
         setEvents(events.filter((e) => e.id !== eventId));
+        alert('Event deleted successfully');
       } else {
         const data = await response.json();
         alert(data.error || 'Failed to delete event');
@@ -211,21 +243,45 @@ export default function OrganizerDashboard() {
             {events.map((event) => (
               <Card
                 key={event.id}
-                className="hover:shadow-lg transition-shadow">
+                className="hover:shadow-lg transition-shadow overflow-hidden">
+                {event.imageUrl && (
+                  <div className="w-full h-48 overflow-hidden">
+                    <img
+                      src={event.imageUrl}
+                      alt={event.title}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                )}
                 <CardHeader>
-                  <div className="flex justify-between items-start">
-                    <div>
+                  <div className="flex justify-between items-start gap-2">
+                    <div className="flex-1">
                       <CardTitle>{event.title}</CardTitle>
                       <CardDescription>
-                        {formatEventDate(
-                          event.startDate,
-                          event.endDate
-                        )}
+                        {formatEventDate(event.startDate, event.endDate)}
                       </CardDescription>
                     </div>
-                    <span className="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-100 rounded-full text-sm font-medium">
-                      {event.attendeeCount} RSVPs
-                    </span>
+                    <div className="flex flex-col items-end gap-2">
+                      <span className="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-100 rounded-full text-sm font-medium whitespace-nowrap">
+                        {event.attendeeCount} RSVPs
+                      </span>
+                      {event.status && event.status !== 'active' && (
+                        <span
+                          className={`px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap ${
+                            event.status === 'cancelled'
+                              ? 'bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-100'
+                              : event.status === 'postponed'
+                              ? 'bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-100'
+                              : 'bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-100'
+                          }`}>
+                          {event.status === 'cancelled'
+                            ? 'Cancelled'
+                            : event.status === 'postponed'
+                            ? 'Rescheduled'
+                            : event.status}
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </CardHeader>
                 <CardContent>
@@ -261,34 +317,54 @@ export default function OrganizerDashboard() {
                         </div>
                       )}
 
-                    <div className="flex space-x-2 pt-2">
-                      <Link
-                        href={`/organizer/events/edit/${event.id}`}
-                        className="flex-1">
+                    <div className="flex flex-col gap-2 pt-2">
+                      <div className="flex gap-2">
+                        <Link href={`/events/${event.id}`} className="flex-1">
+                          <Button variant="outline" className="w-full" size="sm">
+                            View
+                          </Button>
+                        </Link>
+                        {event.status !== 'cancelled' && (
+                          <Link
+                            href={`/organizer/events/edit/${event.id}`}
+                            className="flex-1">
+                            <Button variant="outline" className="w-full" size="sm">
+                              Edit
+                            </Button>
+                          </Link>
+                        )}
+                      </div>
+
+                      {event.status !== 'cancelled' && (
+                        <div className="flex gap-2">
+                          <Button
+                            variant="outline"
+                            className="flex-1"
+                            size="sm"
+                            onClick={() => handlePostpone(event)}>
+                            Postpone
+                          </Button>
+                          <Button
+                            variant="destructive"
+                            className="flex-1"
+                            size="sm"
+                            onClick={() => handleCancelEvent(event)}>
+                            Cancel Event
+                          </Button>
+                        </div>
+                      )}
+
+                      {event.status === 'cancelled' && (
                         <Button
-                          variant="outline"
+                          variant="destructive"
                           className="w-full"
-                          size="sm">
-                          Edit
+                          size="sm"
+                          onClick={() =>
+                            handleDelete(event.id, event.title, event.status)
+                          }>
+                          Delete Permanently
                         </Button>
-                      </Link>
-                      <Button
-                        variant="outline"
-                        className="flex-1"
-                        size="sm"
-                        onClick={() => handleDelete(event.id)}>
-                        Delete
-                      </Button>
-                      <Link
-                        href={`/events/${event.id}`}
-                        className="flex-1">
-                        <Button
-                          variant="outline"
-                          className="w-full"
-                          size="sm">
-                          View
-                        </Button>
-                      </Link>
+                      )}
                     </div>
                   </div>
                 </CardContent>
@@ -297,6 +373,26 @@ export default function OrganizerDashboard() {
           </div>
         )}
       </main>
+
+      {/* Postpone Dialog */}
+      {selectedEvent && (
+        <PostponeEventDialog
+          event={selectedEvent}
+          open={postponeDialogOpen}
+          onOpenChange={setPostponeDialogOpen}
+          onSuccess={handlePostponeSuccess}
+        />
+      )}
+
+      {/* Cancel Dialog */}
+      {selectedEvent && (
+        <CancelEventDialog
+          event={selectedEvent}
+          open={cancelDialogOpen}
+          onOpenChange={setCancelDialogOpen}
+          onSuccess={handleCancelSuccess}
+        />
+      )}
     </div>
   );
 }
