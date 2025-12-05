@@ -52,8 +52,13 @@ model UserProfile {
 model Event {
   id          BigInt        @id @default(autoincrement()) @db.BigInt
   title       String        @db.VarChar(255)
-  description String?       @db.Text  // Example field (optional; expand as needed)
-  date        DateTime?     @db.Timestamp(6)  // Example field
+  description String?       @db.Text
+  startDate   DateTime?     @db.Timestamp(6) @map("start_date")
+  endDate     DateTime?     @db.Timestamp(6) @map("end_date")
+  capacity    Int?          // Maximum number of attendees. NULL means unlimited capacity
+  location    String?       @db.VarChar(500)
+  category    String?       @db.VarChar(100)
+  imageUrl    String?       @db.VarChar(500) @map("image_url")
   userId      BigInt        @db.BigInt @map("user_id")  // Foreign key with custom column name
   createdAt   DateTime      @default(now()) @db.Timestamp(6)
   updatedAt   DateTime      @updatedAt @db.Timestamp(6)
@@ -61,6 +66,7 @@ model Event {
   user        User          @relation("UserEvents", fields: [userId], references: [id])  // Relation to organizer
   attendees   EventAttendee[]  // Many-to-Many: Attendees (via junction)
   
+  @@index([category])
   @@map("events")
 }
 
