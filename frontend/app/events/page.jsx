@@ -13,20 +13,29 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useAuth } from '@/lib/auth-context';
+import { toast } from 'sonner';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 
 export default function EventsPage() {
   const router = useRouter();
-  const { user, signout } = useAuth();
+  const { user, signout, getToken } = useAuth();
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState('all'); // all, upcoming, ongoing, past
+  const [rsvpStatus, setRsvpStatus] = useState({});
+  const [rsvpLoading, setRsvpLoading] = useState({});
 
   useEffect(() => {
     fetchEvents();
   }, []);
+
+  useEffect(() => {
+    if (user && events.length > 0) {
+      checkRsvpStatus();
+    }
+  }, [user, events]);
 
   const fetchEvents = async () => {
     try {
@@ -46,6 +55,111 @@ export default function EventsPage() {
       setEvents([]);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const checkRsvpStatus = async () => {
+    if (!user) return;
+
+    const token = getToken();
+    if (!token) return;
+
+    const statusChecks = events.map(async (event) => {
+      try {
+        const response = await fetch(
+          `${API_URL}/api/rsvp/check/${event.id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        if (response.ok) {
+          const data = await response.json();
+          return { eventId: event.id, hasRsvp: data.hasRsvp };
+        }
+      } catch (error) {
+        console.error(`Error checking RSVP for event ${event.id}:`, error);
+      }
+      return { eventId: event.id, hasRsvp: false };
+    });
+
+    const results = await Promise.all(statusChecks);
+    const statusMap = {};
+    results.forEach((result) => {
+      statusMap[result.eventId] = result.hasRsvp;
+    });
+    setRsvpStatus(statusMap);
+  };
+
+  const handleRsvp = async (eventId) => {
+    if (!user) {
+      toast.error('Please sign in to RSVP');
+      return;
+    }
+
+    const token = getToken();
+    if (!token) {
+      toast.error('Please sign in to RSVP');
+      return;
+    }
+
+    setRsvpLoading((prev) => ({ ...prev, [eventId]: true }));
+
+    try {
+      const response = await fetch(`${API_URL}/api/rsvp/${eventId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        toast.success('RSVP successful!');
+        setRsvpStatus((prev) => ({ ...prev, [eventId]: true }));
+        fetchEvents(); // Refresh to update attendee count
+      } else {
+        toast.error(data.error || 'Failed to RSVP');
+      }
+    } catch (error) {
+      console.error('Error RSVPing:', error);
+      toast.error('Failed to RSVP. Please try again.');
+    } finally {
+      setRsvpLoading((prev) => ({ ...prev, [eventId]: false }));
+    }
+  };
+
+  const handleCancelRsvp = async (eventId) => {
+    const token = getToken();
+    if (!token) return;
+
+    setRsvpLoading((prev) => ({ ...prev, [eventId]: true }));
+
+    try {
+      const response = await fetch(`${API_URL}/api/rsvp/${eventId}`, {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        toast.success('RSVP cancelled');
+        setRsvpStatus((prev) => ({ ...prev, [eventId]: false }));
+        fetchEvents(); // Refresh to update attendee count
+      } else {
+        const data = await response.json();
+        toast.error(data.error || 'Failed to cancel RSVP');
+      }
+    } catch (error) {
+      console.error('Error cancelling RSVP:', error);
+      toast.error('Failed to cancel RSVP');
+    } finally {
+      setRsvpLoading((prev) => ({ ...prev, [eventId]: false }));
     }
   };
 
@@ -288,9 +402,19 @@ export default function EventsPage() {
               return (
                 <Card
                   key={event.id}
-                  className="hover:shadow-lg transition-shadow relative">
+                  className="hover:shadow-lg transition-shadow relative overflow-hidden">
+                  {event.imageUrl && (
+                    <div className="w-full h-48 overflow-hidden">
+                      <img
+                        src={event.imageUrl}
+                        alt={event.title}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  )}
+
                   {/* Status Badge */}
-                  <div className="absolute top-4 right-4">
+                  <div className={`absolute ${event.imageUrl ? 'top-4' : 'top-4'} right-4 z-10`}>
                     <span
                       className={`px-2 py-1 text-xs font-semibold rounded-full ${
                         status === 'upcoming'
@@ -302,7 +426,7 @@ export default function EventsPage() {
                       {status.charAt(0).toUpperCase() + status.slice(1)}
                     </span>
                   </div>
-                  
+
                   <CardHeader>
                     <CardTitle className="pr-20">{event.title}</CardTitle>
                     <CardDescription>
@@ -357,9 +481,32 @@ export default function EventsPage() {
                               : 'attendees'}
                           </span>
                         </div>
-                        <Link href={`/events/${event.id}`}>
-                          <Button size="sm">View Details</Button>
-                        </Link>
+                        <div className="flex gap-2">
+                          {user && user.role === 'student' && (
+                            rsvpStatus[event.id] ? (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleCancelRsvp(event.id)}
+                                disabled={rsvpLoading[event.id]}>
+                                {rsvpLoading[event.id] ? 'Cancelling...' : 'Cancel RSVP'}
+                              </Button>
+                            ) : (
+                              <Button
+                                size="sm"
+                                variant="default"
+                                onClick={() => handleRsvp(event.id)}
+                                disabled={rsvpLoading[event.id]}>
+                                {rsvpLoading[event.id] ? 'RSVPing...' : 'RSVP'}
+                              </Button>
+                            )
+                          )}
+                          <Link href={`/events/${event.id}`}>
+                            <Button size="sm" variant="outline">
+                              View
+                            </Button>
+                          </Link>
+                        </div>
                       </div>
                     </div>
                   </CardContent>

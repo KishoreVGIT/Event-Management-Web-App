@@ -19,6 +19,7 @@ import { FieldLabel, FieldError } from '@/components/ui/field';
 import { DateTimeRangePicker } from '@/components/ui/date-time-range-picker';
 import { ImageUpload } from '@/components/ui/image-upload';
 import { useAuth } from '@/lib/auth-context';
+import { toast } from 'sonner';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 
@@ -29,7 +30,14 @@ const eventSchema = yup.object().shape({
     .min(3, 'Title must be at least 3 characters'),
   description: yup.string(),
   startDate: yup.string().required('Start date is required'),
-  endDate: yup.string().nullable(),
+  endDate: yup
+    .string()
+    .nullable()
+    .test('is-after-start', 'End date/time must be after start date/time', function(value) {
+      const { startDate } = this.parent;
+      if (!value || !startDate) return true; // Skip if either is null
+      return new Date(value) > new Date(startDate);
+    }),
   capacity: yup
     .number()
     .nullable()
@@ -67,7 +75,7 @@ export default function NewEventPage() {
       if (!user) {
         router.push('/signin');
       } else if (user.role !== 'organizer' && user.role !== 'admin') {
-        alert('You must be an organizer to create events');
+        toast.error('You must be an organizer to create events');
         router.push('/events');
       }
     }

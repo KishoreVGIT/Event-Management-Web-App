@@ -1,5 +1,6 @@
 import nodemailer from 'nodemailer';
 import dotenv from 'dotenv';
+import { createEvent } from 'ics';
 
 dotenv.config();
 
@@ -15,22 +16,73 @@ const transporter = nodemailer.createTransport({
 });
 
 /**
+ * Generate iCalendar (.ics) event
+ * @param {Object} event - Event object
+ * @returns {Promise<string>} ICS file content
+ */
+function generateICalEvent(event) {
+  return new Promise((resolve, reject) => {
+    const startDate = new Date(event.startDate);
+    const endDate = event.endDate ? new Date(event.endDate) : new Date(startDate.getTime() + 60 * 60 * 1000); // Default 1 hour if no end
+
+    const icsEvent = {
+      start: [
+        startDate.getFullYear(),
+        startDate.getMonth() + 1,
+        startDate.getDate(),
+        startDate.getHours(),
+        startDate.getMinutes()
+      ],
+      end: [
+        endDate.getFullYear(),
+        endDate.getMonth() + 1,
+        endDate.getDate(),
+        endDate.getHours(),
+        endDate.getMinutes()
+      ],
+      title: event.title,
+      description: event.description || '',
+      location: event.location || '',
+      url: `${process.env.FRONTEND_URL || 'http://localhost:3000'}/events/${event.id}`,
+      status: 'CONFIRMED',
+      busyStatus: 'BUSY',
+      organizer: { name: 'Campus Connect', email: process.env.EMAIL_USER },
+    };
+
+    createEvent(icsEvent, (error, value) => {
+      if (error) {
+        reject(error);
+      } else {
+        resolve(value);
+      }
+    });
+  });
+}
+
+/**
  * Send email
  * @param {Object} options - Email options
  * @param {string} options.to - Recipient email
  * @param {string} options.subject - Email subject
  * @param {string} options.html - Email HTML content
  * @param {string} options.text - Email plain text content
+ * @param {Array} options.attachments - Email attachments (optional)
  */
-export async function sendEmail({ to, subject, html, text }) {
+export async function sendEmail({ to, subject, html, text, attachments }) {
   try {
-    const info = await transporter.sendMail({
+    const mailOptions = {
       from: `"Campus Connect" <${process.env.EMAIL_USER}>`,
       to,
       subject,
       text,
       html,
-    });
+    };
+
+    if (attachments) {
+      mailOptions.attachments = attachments;
+    }
+
+    const info = await transporter.sendMail(mailOptions);
 
     console.log('Email sent:', info.messageId);
     return { success: true, messageId: info.messageId };
@@ -118,6 +170,10 @@ export async function sendRsvpConfirmationEmail(user, event) {
 
           <p>We look forward to seeing you there!</p>
 
+          <p style="margin-top: 20px; padding: 15px; background-color: #eff6ff; border-left: 4px solid #2563eb; border-radius: 4px;">
+            <strong>📅 Add to Calendar:</strong> A calendar file (.ics) is attached to this email. Click it to add this event to your calendar app (Google Calendar, Outlook, Apple Calendar, etc.).
+          </p>
+
           <div style="text-align: center;">
             <a href="${process.env.FRONTEND_URL || 'http://localhost:3000'}/events/${event.id}" class="button">View Event Details</a>
           </div>
@@ -149,6 +205,8 @@ ${event.description ? `Description: ${event.description}` : ''}
 
 We look forward to seeing you there!
 
+ADD TO CALENDAR: A calendar file (.ics) is attached to this email. Open it to add this event to your calendar.
+
 View event details: ${process.env.FRONTEND_URL || 'http://localhost:3000'}/events/${event.id}
 
 ---
@@ -156,7 +214,23 @@ This is an automated message from Campus Connect.
 If you need to cancel your RSVP, please visit the event page.
   `;
 
-  return await sendEmail({ to: user.email, subject, html, text });
+  // Generate iCalendar file
+  try {
+    const icsContent = await generateICalEvent(event);
+    const attachments = [
+      {
+        filename: `${event.title.replace(/[^a-z0-9]/gi, '_')}.ics`,
+        content: icsContent,
+        contentType: 'text/calendar',
+      },
+    ];
+
+    return await sendEmail({ to: user.email, subject, html, text, attachments });
+  } catch (error) {
+    console.error('Error generating calendar file:', error);
+    // Send email without calendar attachment if generation fails
+    return await sendEmail({ to: user.email, subject, html, text });
+  }
 }
 
 /**

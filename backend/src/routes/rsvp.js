@@ -85,7 +85,13 @@ router.post('/:eventId', authenticate, rsvpLimiter, async (req, res) => {
     // Commit transaction
     await client.query('COMMIT');
 
-    // Send confirmation email (don't wait for it - outside transaction)
+    // Fetch user details for email (JWT doesn't include name)
+    const userResult = await query(
+      'SELECT id, name, email FROM users WHERE id = $1',
+      [userId]
+    );
+
+    // Send confirmation email to the student who RSVP'd (don't wait for it)
     const eventData = {
       id: eventResult.rows[0].id,
       title: eventResult.rows[0].title,
@@ -97,8 +103,8 @@ router.post('/:eventId', authenticate, rsvpLimiter, async (req, res) => {
     };
 
     const userData = {
-      name: req.user.name,
-      email: req.user.email,
+      name: userResult.rows[0].name,
+      email: userResult.rows[0].email,
     };
 
     sendRsvpConfirmationEmail(userData, eventData).catch(err => {
