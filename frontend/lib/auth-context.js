@@ -110,9 +110,13 @@ export function AuthProvider({ children }) {
     return localStorage.getItem('token');
   };
 
+  const updateUser = (updatedUser) => {
+    setUser(updatedUser);
+  };
+
   return (
     <AuthContext.Provider
-      value={{ user, signin, signup, signout, loading, getToken }}>
+      value={{ user, signin, signup, signout, loading, getToken, updateUser }}>
       {children}
     </AuthContext.Provider>
   );

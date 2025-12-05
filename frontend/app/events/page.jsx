@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import {
   Card,
   CardContent,
@@ -18,8 +17,7 @@ import { toast } from 'sonner';
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 
 export default function EventsPage() {
-  const router = useRouter();
-  const { user, signout, getToken } = useAuth();
+  const { user, getToken } = useAuth();
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -215,11 +213,6 @@ export default function EventsPage() {
     )} at ${start.toLocaleTimeString('en-US', timeOptions)}`;
   };
 
-  const handleSignOut = () => {
-    signout();
-    router.push('/signin');
-  };
-
   const getEventStatus = (startDate, endDate) => {
     if (!startDate) return 'upcoming';
     
@@ -273,99 +266,77 @@ export default function EventsPage() {
   }, [events]);
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <nav className="bg-white dark:bg-gray-800 shadow">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16">
-            <div className="flex items-center">
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-                Campus Connect
-              </h1>
-            </div>
-            <div className="flex items-center space-x-4">
-              {user ? (
-                <>
-                  <span className="text-sm text-gray-700 dark:text-gray-300">
-                    Welcome, {user.name}
-                  </span>
-                  {user.role === 'organizer' && (
-                    <Button
-                      onClick={() =>
-                        router.push('/organizer/dashboard')
-                      }>
-                      Dashboard
-                    </Button>
-                  )}
-                  <Button variant="outline" onClick={handleSignOut}>
-                    Sign Out
-                  </Button>
-                </>
-              ) : (
-                <>
-                  <Button
-                    variant="outline"
-                    onClick={() => router.push('/signin')}>
-                    Sign In
-                  </Button>
-                  <Button onClick={() => router.push('/signup')}>
-                    Sign Up
-                  </Button>
-                </>
-              )}
-            </div>
-          </div>
-        </div>
-      </nav>
-
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-8">
-          <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        {/* Page Header */}
+        <div className="mb-12">
+          <h1 className="text-4xl sm:text-5xl font-bold text-gray-900 dark:text-white mb-4">
             Discover Campus Events
-          </h2>
-          <p className="text-gray-600 dark:text-gray-400">
+          </h1>
+          <p className="text-xl text-gray-600 dark:text-gray-400">
             Browse, search, and RSVP to events happening on campus
           </p>
         </div>
 
         {/* Search and Filter Section */}
-        <div className="mb-8 space-y-4">
-          <div className="flex flex-col sm:flex-row gap-4">
-            <div className="flex-1">
-              <Input
-                type="text"
-                placeholder="Search events by title, description, or organizer..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full"
-              />
+        <div className="mb-10 space-y-6">
+          {/* Search Bar */}
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+              <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
             </div>
+            <Input
+              type="text"
+              placeholder="Search events by title, description, or organizer..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-12 h-14 text-lg bg-white dark:bg-gray-800 border-2 focus:border-blue-500 dark:focus:border-blue-400 rounded-xl shadow-sm"
+            />
           </div>
 
           {/* Filter Tabs */}
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-3">
             <Button
               variant={filterStatus === 'all' ? 'default' : 'outline'}
               onClick={() => setFilterStatus('all')}
-              size="sm">
-              All Events ({eventStats.all})
+              className={`rounded-full px-6 py-2 transition-all ${
+                filterStatus === 'all'
+                  ? 'bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-500/30'
+                  : 'hover:bg-gray-100 dark:hover:bg-gray-800'
+              }`}>
+              All Events <span className="ml-2 opacity-75">({eventStats.all})</span>
             </Button>
             <Button
               variant={filterStatus === 'upcoming' ? 'default' : 'outline'}
               onClick={() => setFilterStatus('upcoming')}
-              size="sm">
-              Upcoming ({eventStats.upcoming})
+              className={`rounded-full px-6 py-2 transition-all ${
+                filterStatus === 'upcoming'
+                  ? 'bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-500/30'
+                  : 'hover:bg-gray-100 dark:hover:bg-gray-800'
+              }`}>
+              Upcoming <span className="ml-2 opacity-75">({eventStats.upcoming})</span>
             </Button>
             <Button
               variant={filterStatus === 'ongoing' ? 'default' : 'outline'}
               onClick={() => setFilterStatus('ongoing')}
-              size="sm">
-              Ongoing ({eventStats.ongoing})
+              className={`rounded-full px-6 py-2 transition-all ${
+                filterStatus === 'ongoing'
+                  ? 'bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-500/30'
+                  : 'hover:bg-gray-100 dark:hover:bg-gray-800'
+              }`}>
+              Ongoing <span className="ml-2 opacity-75">({eventStats.ongoing})</span>
             </Button>
             <Button
               variant={filterStatus === 'past' ? 'default' : 'outline'}
               onClick={() => setFilterStatus('past')}
-              size="sm">
-              Past ({eventStats.past})
+              className={`rounded-full px-6 py-2 transition-all ${
+                filterStatus === 'past'
+                  ? 'bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-500/30'
+                  : 'hover:bg-gray-100 dark:hover:bg-gray-800'
+              }`}>
+              Past <span className="ml-2 opacity-75">({eventStats.past})</span>
             </Button>
           </div>
         </div>
@@ -396,48 +367,51 @@ export default function EventsPage() {
             )}
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {filteredEvents.map((event) => {
               const status = getEventStatus(event.startDate, event.endDate);
               return (
                 <Card
                   key={event.id}
-                  className="hover:shadow-lg transition-shadow relative overflow-hidden">
+                  className="group hover:shadow-2xl transition-all duration-300 relative overflow-hidden border-2 hover:border-blue-200 dark:hover:border-blue-800 bg-white dark:bg-gray-800 rounded-2xl">
                   {event.imageUrl && (
-                    <div className="w-full h-48 overflow-hidden">
+                    <div className="w-full h-56 overflow-hidden relative">
                       <img
                         src={event.imageUrl}
                         alt={event.title}
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                       />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
                     </div>
                   )}
 
                   {/* Status Badge */}
-                  <div className={`absolute ${event.imageUrl ? 'top-4' : 'top-4'} right-4 z-10`}>
+                  <div className="absolute top-4 right-4 z-10">
                     <span
-                      className={`px-2 py-1 text-xs font-semibold rounded-full ${
+                      className={`px-3 py-1.5 text-xs font-bold rounded-full backdrop-blur-sm shadow-lg ${
                         status === 'upcoming'
-                          ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'
+                          ? 'bg-blue-500/90 text-white'
                           : status === 'ongoing'
-                          ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
-                          : 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200'
+                          ? 'bg-green-500/90 text-white'
+                          : 'bg-gray-500/90 text-white'
                       }`}>
                       {status.charAt(0).toUpperCase() + status.slice(1)}
                     </span>
                   </div>
 
-                  <CardHeader>
-                    <CardTitle className="pr-20">{event.title}</CardTitle>
-                    <CardDescription>
-                      Organized by {event.user.name}
+                  <CardHeader className="pb-4">
+                    <CardTitle className="text-xl pr-20 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                      {event.title}
+                    </CardTitle>
+                    <CardDescription className="text-sm">
+                      Organized by <span className="font-semibold">{event.user.name}</span>
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <div className="space-y-3">
-                      <div className="flex items-start gap-2">
+                    <div className="space-y-4">
+                      <div className="flex items-start gap-3">
                         <svg
-                          className="w-5 h-5 text-gray-500 dark:text-gray-400 mt-0.5 flex-shrink-0"
+                          className="w-5 h-5 text-blue-500 dark:text-blue-400 mt-0.5 flex-shrink-0"
                           fill="none"
                           stroke="currentColor"
                           viewBox="0 0 24 24">
@@ -448,7 +422,7 @@ export default function EventsPage() {
                             d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
                           />
                         </svg>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">
+                        <p className="text-sm text-gray-600 dark:text-gray-400 font-medium">
                           {formatEventDate(
                             event.startDate,
                             event.endDate
@@ -456,14 +430,14 @@ export default function EventsPage() {
                         </p>
                       </div>
                       {event.description && (
-                        <p className="text-sm line-clamp-2 text-gray-700 dark:text-gray-300">
+                        <p className="text-sm line-clamp-2 text-gray-700 dark:text-gray-300 leading-relaxed">
                           {event.description}
                         </p>
                       )}
-                      <div className="flex items-center justify-between pt-3 border-t dark:border-gray-700">
+                      <div className="flex items-center justify-between pt-4 border-t-2 dark:border-gray-700">
                         <div className="flex items-center gap-2">
                           <svg
-                            className="w-5 h-5 text-gray-500 dark:text-gray-400"
+                            className="w-5 h-5 text-purple-500 dark:text-purple-400"
                             fill="none"
                             stroke="currentColor"
                             viewBox="0 0 24 24">
@@ -474,36 +448,37 @@ export default function EventsPage() {
                               d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
                             />
                           </svg>
-                          <span className="text-sm text-gray-600 dark:text-gray-400">
+                          <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">
                             {event.attendeeCount}{' '}
                             {event.attendeeCount === 1
                               ? 'attendee'
                               : 'attendees'}
                           </span>
                         </div>
-                        <div className="flex gap-2">
+                        <div className="flex gap-2 flex-wrap">
                           {user && user.role === 'student' && (
                             rsvpStatus[event.id] ? (
                               <Button
                                 size="sm"
                                 variant="outline"
                                 onClick={() => handleCancelRsvp(event.id)}
-                                disabled={rsvpLoading[event.id]}>
+                                disabled={rsvpLoading[event.id]}
+                                className="border-red-200 text-red-600 hover:bg-red-50 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-900/20">
                                 {rsvpLoading[event.id] ? 'Cancelling...' : 'Cancel RSVP'}
                               </Button>
                             ) : (
                               <Button
                                 size="sm"
-                                variant="default"
                                 onClick={() => handleRsvp(event.id)}
-                                disabled={rsvpLoading[event.id]}>
+                                disabled={rsvpLoading[event.id]}
+                                className="bg-blue-600 hover:bg-blue-700">
                                 {rsvpLoading[event.id] ? 'RSVPing...' : 'RSVP'}
                               </Button>
                             )
                           )}
                           <Link href={`/events/${event.id}`}>
-                            <Button size="sm" variant="outline">
-                              View
+                            <Button size="sm" variant="outline" className="hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 dark:hover:bg-blue-900/20 dark:hover:text-blue-400">
+                              View Details
                             </Button>
                           </Link>
                         </div>
@@ -524,7 +499,7 @@ export default function EventsPage() {
             </p>
           </div>
         )}
-      </main>
+      </div>
     </div>
   );
 }
