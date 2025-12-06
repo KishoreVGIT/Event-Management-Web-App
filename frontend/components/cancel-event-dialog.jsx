@@ -13,8 +13,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+import { API_URL } from '@/lib/constants';
 
 export function CancelEventDialog({ event, open, onOpenChange, onSuccess }) {
   const [loading, setLoading] = useState(false);

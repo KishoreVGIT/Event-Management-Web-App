@@ -2,20 +2,10 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
 import { useAuth } from '@/lib/auth-context';
-import { Search, Trash2, Eye } from 'lucide-react';
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+import { API_URL } from '@/lib/constants';
+import { AdminHeader } from '@/components/admin/AdminHeader';
+import { EventsTable } from '@/components/admin/EventsTable';
 
 export default function AdminEventsPage() {
   const router = useRouter();
@@ -83,12 +73,15 @@ export default function AdminEventsPage() {
 
     try {
       const token = getToken();
-      const response = await fetch(`${API_URL}/api/admin/events/${eventId}`, {
-        method: 'DELETE',
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await fetch(
+        `${API_URL}/api/admin/events/${eventId}`,
+        {
+          method: 'DELETE',
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
       if (response.ok) {
         setEvents(events.filter((e) => e.id !== eventId));
@@ -136,112 +129,19 @@ export default function AdminEventsPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <nav className="bg-white dark:bg-gray-800 shadow">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16">
-            <div className="flex items-center">
-              <Link href="/admin/dashboard">
-                <h1 className="text-2xl font-bold text-gray-900 dark:text-white cursor-pointer">
-                  Campus Connect - Event Management
-                </h1>
-              </Link>
-            </div>
-            <div className="flex items-center space-x-4">
-              <Link href="/admin/dashboard">
-                <Button variant="outline">Back to Dashboard</Button>
-              </Link>
-            </div>
-          </div>
-        </div>
-      </nav>
+      <AdminHeader title="Campus Connect - Event Management" />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <Card>
-          <CardHeader>
-            <div className="flex justify-between items-center">
-              <CardTitle>All Events ({filteredEvents.length})</CardTitle>
-              <div className="relative w-64">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                <Input
-                  type="text"
-                  placeholder="Search events..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b">
-                    <th className="text-left p-3">Title</th>
-                    <th className="text-left p-3">Organizer</th>
-                    <th className="text-left p-3">Category</th>
-                    <th className="text-left p-3">Date</th>
-                    <th className="text-left p-3">Status</th>
-                    <th className="text-left p-3">Attendees</th>
-                    <th className="text-left p-3">Created</th>
-                    <th className="text-left p-3">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredEvents.map((event) => {
-                    const status = getEventStatus(event.startDate, event.endDate);
-                    return (
-                      <tr
-                        key={event.id}
-                        className="border-b hover:bg-gray-50 dark:hover:bg-gray-800">
-                        <td className="p-3 font-medium">{event.title}</td>
-                        <td className="p-3">
-                          <div>
-                            <div>{event.organizer.name}</div>
-                            <div className="text-xs text-gray-500">{event.organizer.email}</div>
-                          </div>
-                        </td>
-                        <td className="p-3">
-                          {event.category ? (
-                            <Badge variant="secondary">{event.category}</Badge>
-                          ) : (
-                            <span className="text-gray-400 text-sm">None</span>
-                          )}
-                        </td>
-                        <td className="p-3">{formatDate(event.startDate)}</td>
-                        <td className="p-3">
-                          <Badge className={`${status.color} text-white`}>{status.label}</Badge>
-                        </td>
-                        <td className="p-3">
-                          {event.attendeeCount}
-                          {event.capacity && ` / ${event.capacity}`}
-                        </td>
-                        <td className="p-3">{formatDate(event.createdAt)}</td>
-                        <td className="p-3">
-                          <div className="flex gap-2">
-                            <Link href={`/events/${event.id}`}>
-                              <Button variant="outline" size="sm" title="View Event">
-                                <Eye className="w-4 h-4" />
-                              </Button>
-                            </Link>
-                            <Button
-                              variant="destructive"
-                              size="sm"
-                              onClick={() => handleDeleteEvent(event.id, event.title)}
-                              title="Delete Event">
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          </CardContent>
-        </Card>
+        <EventsTable
+          events={filteredEvents}
+          searchTerm={searchTerm}
+          setSearchTerm={setSearchTerm}
+          formatDate={formatDate}
+          getEventStatus={getEventStatus}
+          handleDeleteEvent={handleDeleteEvent}
+        />
       </main>
     </div>
   );
 }
+

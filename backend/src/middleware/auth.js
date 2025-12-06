@@ -14,7 +14,17 @@ export const authenticate = (req, res, next) => {
     }
 
     const decoded = jwt.verify(token, JWT_SECRET);
-    req.user = decoded;
+
+    // Normalize the shape here
+    req.user = {
+      ...decoded,
+      id: decoded.id || decoded.userId || decoded.sub,
+    };
+
+    if (!req.user.id) {
+      return res.status(401).json({ error: 'Invalid token payload' });
+    }
+
     next();
   } catch (error) {
     console.error(error);

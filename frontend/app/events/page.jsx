@@ -31,8 +31,18 @@ export default function EventsPage() {
   const fetchEvents = async () => {
     try {
       const response = await fetch(`${API_URL}/api/events`);
-      const data = await response.json();
-      setEvents(data);
+      if (response.ok) {
+        const data = await response.json();
+        if (Array.isArray(data)) {
+          setEvents(data);
+        } else {
+          console.error('Events data is not an array:', data);
+          setEvents([]);
+        }
+      } else {
+        console.error('Failed to fetch events:', response.statusText);
+        setEvents([]);
+      }
     } catch (error) {
       console.error('Error fetching events:', error);
       setEvents([]);
