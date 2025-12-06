@@ -1,11 +1,11 @@
 import express from 'express';
 import { query } from '../db.js';
-import { authenticateToken } from '../middleware/auth.js';
+import { authenticate } from '../middleware/auth.js';
 
 const router = express.Router();
 
 // Get current user's profile
-router.get('/me', authenticateToken, async (req, res) => {
+router.get('/me', authenticate, async (req, res) => {
   try {
     const userId = req.user.id;
 
@@ -111,7 +111,7 @@ router.get('/me', authenticateToken, async (req, res) => {
 });
 
 // Update current user's profile
-router.put('/me', authenticateToken, async (req, res) => {
+router.put('/me', authenticate, async (req, res) => {
   try {
     const userId = req.user.id;
     const { name } = req.body;

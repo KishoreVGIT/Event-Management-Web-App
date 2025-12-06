@@ -5,7 +5,15 @@ import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/lib/auth-context';
-import { Menu, X, Calendar, Home, User, LayoutDashboard, Users } from 'lucide-react';
+import {
+  Menu,
+  X,
+  Calendar,
+  Home,
+  User,
+  LayoutDashboard,
+  Users,
+} from 'lucide-react';
 
 export function Navigation() {
   const router = useRouter();
@@ -26,20 +34,35 @@ export function Navigation() {
   const navLinks = [
     { href: '/', label: 'Home', icon: Home, show: true },
     { href: '/events', label: 'Events', icon: Calendar, show: true },
-    { href: '/events/calendar', label: 'Calendar', icon: Calendar, show: !!user },
     {
-      href: user?.role === 'student' ? '/student/dashboard' : '/organizer/dashboard',
+      href: '/events/calendar',
+      label: 'Calendar',
+      icon: Calendar,
+      show: !!user,
+    },
+    {
+      href:
+        user?.role === 'student'
+          ? '/student/dashboard'
+          : '/organizer/dashboard',
       label: 'Dashboard',
       icon: LayoutDashboard,
-      show: user && (user.role === 'student' || user.role === 'organizer')
+      show:
+        user &&
+        (user.role === 'student' || user.role === 'organizer'),
     },
-    { href: '/admin/dashboard', label: 'Admin', icon: Users, show: user?.role === 'admin' },
+    {
+      href: '/admin/dashboard',
+      label: 'Admin',
+      icon: Users,
+      show: user?.role === 'admin',
+    },
     { href: '/profile', label: 'Profile', icon: User, show: !!user },
-  ].filter(link => link.show);
+  ].filter((link) => link.show);
 
   return (
     <nav className="sticky top-0 z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg border-b border-gray-200 dark:border-gray-800">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto ">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-2">
@@ -83,8 +106,7 @@ export function Navigation() {
                   variant="outline"
                   size="sm"
                   onClick={handleSignOut}
-                  className="hover:bg-red-50 hover:text-red-600 hover:border-red-200 dark:hover:bg-red-900/20 dark:hover:text-red-400"
-                >
+                  className="hover:bg-red-50 hover:text-red-600 hover:border-red-200 dark:hover:bg-red-900/20 dark:hover:text-red-400">
                   Sign Out
                 </Button>
               </>
@@ -146,7 +168,8 @@ export function Navigation() {
               {user ? (
                 <>
                   <div className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 rounded-lg">
-                    Signed in as <span className="font-semibold">{user.name}</span>
+                    Signed in as{' '}
+                    <span className="font-semibold">{user.name}</span>
                   </div>
                   <Button
                     variant="outline"
@@ -200,27 +223,36 @@ export function Footer() {
               </span>
             </div>
             <p className="text-gray-600 dark:text-gray-400 text-sm max-w-md">
-              Your one-stop platform for discovering, organizing, and attending campus events.
-              Connect with your community and never miss out on what's happening around you.
+              Your one-stop platform for discovering, organizing, and
+              attending campus events. Connect with your community and
+              never miss out on what's happening around you.
             </p>
           </div>
 
           {/* Quick Links */}
           <div>
-            <h3 className="font-semibold text-gray-900 dark:text-white mb-3">Quick Links</h3>
+            <h3 className="font-semibold text-gray-900 dark:text-white mb-3">
+              Quick Links
+            </h3>
             <ul className="space-y-2">
               <li>
-                <Link href="/events" className="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 text-sm">
+                <Link
+                  href="/events"
+                  className="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 text-sm">
                   Browse Events
                 </Link>
               </li>
               <li>
-                <Link href="/events/calendar" className="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 text-sm">
+                <Link
+                  href="/events/calendar"
+                  className="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 text-sm">
                   Event Calendar
                 </Link>
               </li>
               <li>
-                <Link href="/signup" className="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 text-sm">
+                <Link
+                  href="/signup"
+                  className="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 text-sm">
                   Create Account
                 </Link>
               </li>
@@ -229,7 +261,9 @@ export function Footer() {
 
           {/* About */}
           <div>
-            <h3 className="font-semibold text-gray-900 dark:text-white mb-3">About</h3>
+            <h3 className="font-semibold text-gray-900 dark:text-white mb-3">
+              About
+            </h3>
             <ul className="space-y-2">
               <li>
                 <span className="text-gray-600 dark:text-gray-400 text-sm">
@@ -247,7 +281,8 @@ export function Footer() {
 
         <div className="mt-8 pt-8 border-t border-gray-200 dark:border-gray-800">
           <p className="text-center text-sm text-gray-600 dark:text-gray-400">
-            &copy; {new Date().getFullYear()} Campus Connect. All rights reserved.
+            &copy; {new Date().getFullYear()} Campus Connect. All
+            rights reserved.
           </p>
         </div>
       </div>

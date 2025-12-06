@@ -14,7 +14,8 @@ import { Button } from '@/components/ui/button';
 import { useAuth } from '@/lib/auth-context';
 import { AddToCalendar } from '@/components/add-to-calendar';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+const API_URL =
+  process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 
 export default function EventDetailPage() {
   const router = useRouter();
@@ -214,24 +215,11 @@ export default function EventDetailPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <nav className="bg-white dark:bg-gray-800 shadow">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16">
-            <div className="flex items-center">
-              <Link href="/events">
-                <h1 className="text-2xl font-bold text-gray-900 dark:text-white cursor-pointer">
-                  Campus Connect
-                </h1>
-              </Link>
-            </div>
-            <div className="flex items-center space-x-4">
-              <Link href="/events">
-                <Button variant="outline">Back to Events</Button>
-              </Link>
-            </div>
-          </div>
-        </div>
-      </nav>
+      <div className="flex items-center space-x-4">
+        <Link href="/events">
+          <Button variant="outline">Back to Events</Button>
+        </Link>
+      </div>
 
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Card>
@@ -273,7 +261,9 @@ export default function EventDetailPage() {
 
             {event.location && (
               <div>
-                <h3 className="text-lg font-semibold mb-2">Location</h3>
+                <h3 className="text-lg font-semibold mb-2">
+                  Location
+                </h3>
                 <p className="text-gray-700 dark:text-gray-300">
                   {event.location}
                 </p>
@@ -282,7 +272,9 @@ export default function EventDetailPage() {
 
             {event.category && (
               <div>
-                <h3 className="text-lg font-semibold mb-2">Category</h3>
+                <h3 className="text-lg font-semibold mb-2">
+                  Category
+                </h3>
                 <p className="text-gray-700 dark:text-gray-300">
                   {event.category}
                 </p>
@@ -298,11 +290,12 @@ export default function EventDetailPage() {
                 {event.capacity ? `/ ${event.capacity}` : ''}{' '}
                 {event.attendeeCount === 1 ? 'person' : 'people'}{' '}
                 attending
-                {event.capacity && event.attendeeCount >= event.capacity && (
-                  <span className="ml-2 text-red-600 font-semibold">
-                    (Full)
-                  </span>
-                )}
+                {event.capacity &&
+                  event.attendeeCount >= event.capacity && (
+                    <span className="ml-2 text-red-600 font-semibold">
+                      (Full)
+                    </span>
+                  )}
               </p>
 
               {event.attendees && event.attendees.length > 0 && (
@@ -324,7 +317,6 @@ export default function EventDetailPage() {
             </div>
 
             <div className="pt-4 flex flex-col sm:flex-row gap-3">
-
               {user ? (
                 hasRsvp ? (
                   <Button
@@ -334,10 +326,9 @@ export default function EventDetailPage() {
                     className="w-full sm:w-auto">
                     {rsvpLoading ? 'Cancelling...' : 'Cancel RSVP'}
                   </Button>
-                ) : event.capacity && event.attendeeCount >= event.capacity ? (
-                  <Button
-                    disabled
-                    className="w-full sm:w-auto">
+                ) : event.capacity &&
+                  event.attendeeCount >= event.capacity ? (
+                  <Button disabled className="w-full sm:w-auto">
                     Event Full
                   </Button>
                 ) : (
