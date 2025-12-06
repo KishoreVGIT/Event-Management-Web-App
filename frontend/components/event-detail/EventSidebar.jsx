@@ -134,7 +134,7 @@ export function EventSidebar({
                 variant="outline"
                 onClick={onCancelRsvp}
                 disabled={rsvpLoading}
-                className="w-full h-11 rounded-full border-red-500/40 text-red-400 hover:bg-red-500/10 hover:text-red-300">
+                className="w-full h-11 rounded-full border-red-500/40 bg-red-500 hover:bg-red-500/10 text-white hover:text-red-300">
                 {rsvpLoading ? 'Cancelling…' : 'Cancel RSVP'}
               </Button>
             ) : capacity && attendeeCount >= capacity ? (

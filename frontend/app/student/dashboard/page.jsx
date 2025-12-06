@@ -142,12 +142,12 @@ export default function StudentDashboardPage() {
           </div>
           <div className="flex gap-3">
              <Link href="/events">
-                <Button variant="outline" className="border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white">
+                <Button className="border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white">
                   Browse Events
                 </Button>
               </Link>
              <Link href="/student/my-events">
-                <Button variant="outline" className="border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white">
+                <Button className="border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white">
                   My Events
                 </Button>
               </Link>
