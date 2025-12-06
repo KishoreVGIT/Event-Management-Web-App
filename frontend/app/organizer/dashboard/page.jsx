@@ -177,68 +177,66 @@ export default function OrganizerDashboard() {
 
   if (authLoading || (user && user.role === 'organizer' && loading)) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
-        <p className="text-gray-600 dark:text-gray-400">Loading...</p>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-slate-950 via-slate-950 to-slate-900">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-14 h-14 rounded-full border-4 border-slate-700 border-t-blue-500 animate-spin" />
+          <p className="text-sm font-medium text-slate-300">Loading dashboard...</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <nav className="bg-white dark:bg-gray-800 shadow">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16">
-            <div className="flex items-center">
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+    <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-950 to-slate-900">
+      {/* Background Pattern */}
+      <div className="fixed inset-0 bg-[linear-gradient(to_right,#1e293b_1px,transparent_1px),linear-gradient(to_bottom,#1e293b_1px,transparent_1px)] bg-[size:4rem_4rem] opacity-10" />
+
+      <main className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
+        {/* Header */}
+        <div className="mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
+            <div>
+              <h1 className="text-3xl sm:text-4xl font-bold text-slate-50 mb-2">
                 Organizer Dashboard
               </h1>
+              <p className="text-slate-400">
+                Manage your events and track attendees
+              </p>
             </div>
-            <div className="flex items-center space-x-4">
-              <span className="text-sm text-gray-700 dark:text-gray-300">
-                {user?.name}
-              </span>
-              <Link href="/events">
-                <Button variant="outline">View All Events</Button>
-              </Link>
-              <Link href="/profile">
-                <Button variant="outline">Profile</Button>
-              </Link>
-              <Button variant="outline" onClick={handleSignOut}>
-                Sign Out
+            <Link href="/organizer/events/new">
+              <Button className="bg-blue-600 hover:bg-blue-500 text-white rounded-full shadow-lg shadow-blue-500/30 transition-all hover:scale-105">
+                Create New Event
               </Button>
-            </div>
+            </Link>
           </div>
-        </div>
-      </nav>
-
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-8 flex justify-between items-center">
-          <div>
-            <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-              My Events
-            </h2>
-            <p className="text-gray-600 dark:text-gray-400">
-              Manage your events and track attendees
-            </p>
-          </div>
-          <Link href="/organizer/events/new">
-            <Button>Create New Event</Button>
-          </Link>
         </div>
 
         {loading ? (
-          <div className="text-center py-12">
-            <p className="text-gray-600 dark:text-gray-400">
-              Loading your events...
-            </p>
+          <div className="text-center py-20">
+            <div className="flex flex-col items-center gap-4">
+              <div className="w-14 h-14 rounded-full border-4 border-slate-700 border-t-blue-500 animate-spin" />
+              <p className="text-sm font-medium text-slate-300">
+                Loading your events...
+              </p>
+            </div>
           </div>
         ) : events.length === 0 ? (
-          <div className="text-center py-12">
-            <p className="text-gray-600 dark:text-gray-400 mb-4">
+          <div className="text-center py-20">
+            <div className="w-20 h-20 bg-slate-900/60 border border-slate-800 rounded-3xl flex items-center justify-center mx-auto mb-4 shadow-xl shadow-blue-900/40">
+              <svg className="w-9 h-9 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+            </div>
+            <h3 className="text-xl font-semibold text-slate-50 mb-2">
+              No events yet
+            </h3>
+            <p className="text-slate-400 mb-6">
               You haven&apos;t created any events yet.
             </p>
             <Link href="/organizer/events/new">
-              <Button>Create Your First Event</Button>
+              <Button className="bg-blue-600 hover:bg-blue-500 text-white rounded-full shadow-lg shadow-blue-500/30 transition-all hover:scale-105">
+                Create Your First Event
+              </Button>
             </Link>
           </div>
         ) : (
@@ -246,36 +244,36 @@ export default function OrganizerDashboard() {
             {events.map((event) => (
               <Card
                 key={event.id}
-                className="hover:shadow-lg transition-shadow overflow-hidden">
+                className="group hover:shadow-2xl hover:shadow-blue-900/20 transition-all duration-300 overflow-hidden bg-slate-950/70 border-slate-800/70 backdrop-blur-xl rounded-2xl">
                 {event.imageUrl && (
                   <div className="w-full h-48 overflow-hidden">
                     <img
                       src={event.imageUrl}
                       alt={event.title}
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                     />
                   </div>
                 )}
-                <CardHeader>
+                <CardHeader className="pb-3">
                   <div className="flex justify-between items-start gap-2">
                     <div className="flex-1">
-                      <CardTitle>{event.title}</CardTitle>
-                      <CardDescription>
+                      <CardTitle className="text-slate-50 line-clamp-1">{event.title}</CardTitle>
+                      <CardDescription className="text-slate-400 mt-1">
                         {formatEventDate(event.startDate, event.endDate)}
                       </CardDescription>
                     </div>
                     <div className="flex flex-col items-end gap-2">
-                      <span className="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-100 rounded-full text-sm font-medium whitespace-nowrap">
+                      <span className="px-3 py-1 bg-blue-500/10 border border-blue-500/30 text-blue-300 rounded-full text-sm font-medium whitespace-nowrap">
                         {event.attendeeCount} RSVPs
                       </span>
                       {event.status && event.status !== 'active' && (
                         <span
                           className={`px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap ${
                             event.status === 'cancelled'
-                              ? 'bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-100'
+                              ? 'bg-red-500/10 border border-red-500/30 text-red-300'
                               : event.status === 'postponed'
-                              ? 'bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-100'
-                              : 'bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-100'
+                              ? 'bg-yellow-500/10 border border-yellow-500/30 text-yellow-300'
+                              : 'bg-slate-500/10 border border-slate-500/30 text-slate-300'
                           }`}>
                           {event.status === 'cancelled'
                             ? 'Cancelled'
@@ -290,7 +288,7 @@ export default function OrganizerDashboard() {
                 <CardContent>
                   <div className="space-y-4">
                     {event.description && (
-                      <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
+                      <p className="text-sm text-slate-400 line-clamp-2">
                         {event.description}
                       </p>
                     )}
@@ -298,7 +296,7 @@ export default function OrganizerDashboard() {
                     {event.attendees &&
                       event.attendees.length > 0 && (
                         <div>
-                          <h4 className="text-sm font-semibold mb-2">
+                          <h4 className="text-sm font-semibold mb-2 text-slate-300">
                             Attendees:
                           </h4>
                           <div className="flex flex-wrap gap-2">
@@ -307,12 +305,12 @@ export default function OrganizerDashboard() {
                               .map((attendee) => (
                                 <div
                                   key={attendee.id}
-                                  className="flex items-center space-x-1 text-xs bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">
+                                  className="flex items-center space-x-1 text-xs bg-slate-900/70 border border-slate-800/50 px-2 py-1 rounded-lg text-slate-300">
                                   <span>{attendee.user.name}</span>
                                 </div>
                               ))}
                             {event.attendees.length > 5 && (
-                              <span className="text-xs text-gray-500 px-2 py-1">
+                              <span className="text-xs text-slate-500 px-2 py-1">
                                 +{event.attendees.length - 5} more
                               </span>
                             )}
@@ -323,7 +321,10 @@ export default function OrganizerDashboard() {
                     <div className="flex flex-col gap-2 pt-2">
                       <div className="flex gap-2">
                         <Link href={`/events/${event.id}`} className="flex-1">
-                          <Button variant="outline" className="w-full" size="sm">
+                          <Button
+                            variant="outline"
+                            className="w-full border-slate-700 text-slate-300 bg-slate-950/70 hover:bg-slate-900 hover:border-slate-600 hover:text-slate-100 rounded-full"
+                            size="sm">
                             View
                           </Button>
                         </Link>
@@ -331,7 +332,10 @@ export default function OrganizerDashboard() {
                           <Link
                             href={`/organizer/events/edit/${event.id}`}
                             className="flex-1">
-                            <Button variant="outline" className="w-full" size="sm">
+                            <Button
+                              variant="outline"
+                              className="w-full border-slate-700 text-slate-300 bg-slate-950/70 hover:bg-slate-900 hover:border-slate-600 hover:text-slate-100 rounded-full"
+                              size="sm">
                               Edit
                             </Button>
                           </Link>
@@ -342,14 +346,14 @@ export default function OrganizerDashboard() {
                         <div className="flex gap-2">
                           <Button
                             variant="outline"
-                            className="flex-1"
+                            className="flex-1 border-yellow-500/40 text-yellow-400 hover:bg-yellow-500/10 hover:text-yellow-300 hover:border-yellow-500/60 rounded-full"
                             size="sm"
                             onClick={() => handlePostpone(event)}>
                             Postpone
                           </Button>
                           <Button
-                            variant="destructive"
-                            className="flex-1"
+                            variant="outline"
+                            className="flex-1 border-red-500/40 text-red-400 hover:bg-red-500/10 hover:text-red-300 hover:border-red-500/60 rounded-full"
                             size="sm"
                             onClick={() => handleCancelEvent(event)}>
                             Cancel Event
@@ -359,8 +363,8 @@ export default function OrganizerDashboard() {
 
                       {event.status === 'cancelled' && (
                         <Button
-                          variant="destructive"
-                          className="w-full"
+                          variant="outline"
+                          className="w-full border-red-500/40 text-red-400 hover:bg-red-500/10 hover:text-red-300 hover:border-red-500/60 rounded-full"
                           size="sm"
                           onClick={() =>
                             handleDelete(event.id, event.title, event.status)

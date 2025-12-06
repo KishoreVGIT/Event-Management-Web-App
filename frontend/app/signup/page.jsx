@@ -6,7 +6,6 @@ import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import Link from 'next/link';
-import Image from 'next/image';
 import { useAuth } from '@/lib/auth-context';
 import {
   Card,
@@ -24,7 +23,7 @@ import {
   FieldError,
   FieldContent,
 } from '@/components/ui/field';
-import img from '@/public/pfw.jpg';
+import { Calendar, Eye, EyeOff, UserPlus, CheckCircle2, LogIn } from 'lucide-react';
 
 const signUpSchema = yup.object({
   firstName: yup
@@ -51,6 +50,9 @@ const signUpSchema = yup.object({
     .string()
     .oneOf(['student', 'organizer'], 'Invalid role')
     .required('Please select a role'),
+  organizationName: yup
+    .string()
+    .min(2, 'Organization name must be at least 2 characters'),
 });
 
 function SignUp() {
@@ -65,10 +67,13 @@ function SignUp() {
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors },
   } = useForm({
     resolver: yupResolver(signUpSchema),
   });
+
+  const selectedRole = watch('role');
 
   const onSubmit = async (data) => {
     setError('');
@@ -80,7 +85,8 @@ function SignUp() {
         data.lastName,
         data.email,
         data.password,
-        data.role
+        data.role,
+        data.organizationName
       );
       router.push('/events');
     } catch (err) {
@@ -91,287 +97,276 @@ function SignUp() {
   };
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="w-full max-w-4xl">
+    <main className="min-h-screen flex items-center justify-center bg-gradient-to-b from-slate-950 via-slate-950 to-slate-900 py-12 px-4 sm:px-6 lg:px-8">
+      {/* Background Pattern */}
+      <div className="fixed inset-0 bg-[linear-gradient(to_right,#1e293b_1px,transparent_1px),linear-gradient(to_bottom,#1e293b_1px,transparent_1px)] bg-[size:4rem_4rem] opacity-10" />
+
+      <div className="w-full max-w-4xl relative z-10">
+        {/* Logo and Title */}
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">
+          <div className="flex items-center justify-center space-x-2 mb-4">
+            <div className="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/30">
+              <Calendar className="w-7 h-7 text-white" />
+            </div>
+            <span className="text-2xl font-bold text-slate-50">
+              Campus Connect
+            </span>
+          </div>
+          <h1 className="text-3xl sm:text-4xl font-bold text-slate-50 mb-2">
             Join Campus Connect
           </h1>
-          <p className="text-gray-600 dark:text-gray-400">
+          <p className="text-slate-400">
             Create your account and start discovering amazing events
           </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+          {/* Benefits Section */}
           <div className="hidden md:block">
-            <div className="sticky top-8">
-              <div className="relative h-96 w-full rounded-2xl overflow-hidden shadow-xl">
-                <Image
-                  src={img}
-                  alt="Event management illustration"
-                  fill
-                  className="object-cover"
-                />
-              </div>
-              <div className="mt-6 p-6 bg-blue-50 dark:bg-blue-900/20 rounded-2xl border border-blue-100 dark:border-blue-800">
-                <h3 className="font-semibold text-gray-900 dark:text-white mb-2">
-                  Why join Campus Connect?
-                </h3>
-                <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
-                  <li className="flex items-center gap-2">
-                    <svg className="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                    </svg>
-                    Discover campus events instantly
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <svg className="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                    </svg>
-                    Easy RSVP and notifications
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <svg className="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                    </svg>
-                    Connect with your community
-                  </li>
-                </ul>
+            <div className="sticky top-8 space-y-6">
+              <Card className="bg-slate-950/70 border-slate-800/70 backdrop-blur-xl rounded-2xl shadow-2xl shadow-blue-900/20">
+                <CardContent className="p-6">
+                  <h3 className="font-semibold text-slate-50 mb-4 flex items-center gap-2">
+                    <CheckCircle2 className="w-5 h-5 text-blue-400" />
+                    Why join Campus Connect?
+                  </h3>
+                  <ul className="space-y-3 text-sm text-slate-300">
+                    <li className="flex items-start gap-3 p-3 rounded-xl bg-slate-900/50 border border-slate-800/50">
+                      <div className="w-5 h-5 rounded-full bg-blue-500/10 border border-blue-500/30 flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <CheckCircle2 className="w-3 h-3 text-blue-400" />
+                      </div>
+                      <span>Discover campus events instantly</span>
+                    </li>
+                    <li className="flex items-start gap-3 p-3 rounded-xl bg-slate-900/50 border border-slate-800/50">
+                      <div className="w-5 h-5 rounded-full bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <CheckCircle2 className="w-3 h-3 text-emerald-400" />
+                      </div>
+                      <span>Easy RSVP and notifications</span>
+                    </li>
+                    <li className="flex items-start gap-3 p-3 rounded-xl bg-slate-900/50 border border-slate-800/50">
+                      <div className="w-5 h-5 rounded-full bg-purple-500/10 border border-purple-500/30 flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <CheckCircle2 className="w-3 h-3 text-purple-400" />
+                      </div>
+                      <span>Connect with your community</span>
+                    </li>
+                  </ul>
+                </CardContent>
+              </Card>
+
+              <div className="p-4 rounded-2xl bg-blue-500/5 border border-blue-500/20 backdrop-blur-sm">
+                <p className="text-xs text-center text-slate-400">
+                  Join 5000+ active students already using Campus Connect
+                </p>
               </div>
             </div>
           </div>
 
-          <Card className="w-full shadow-xl border-2">
-            <CardContent className="pt-6">
+          {/* Form Section */}
+          <Card className="w-full bg-slate-950/70 border-slate-800/70 backdrop-blur-xl rounded-2xl shadow-2xl shadow-blue-900/20">
+            <CardContent className="pt-6 pb-8 px-6 sm:px-8">
               <form
                 onSubmit={handleSubmit(onSubmit)}
                 className="space-y-4">
                 {error && (
-                  <div className="p-4 text-sm text-red-600 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+                  <div className="p-4 text-sm text-red-300 bg-red-500/10 rounded-2xl border border-red-500/30 backdrop-blur-sm">
                     {error}
                   </div>
                 )}
 
                 <div className="grid grid-cols-2 gap-4">
-                  <Field>
-                    <FieldLabel htmlFor="firstName">
+                  <div className="space-y-2">
+                    <FieldLabel htmlFor="firstName" className="text-sm font-medium text-slate-300">
                       First Name
                     </FieldLabel>
-                    <FieldContent>
-                      <Input
-                        id="firstName"
-                        type="text"
-                        {...register('firstName')}
-                        placeholder="John"
-                      />
-                      <FieldError
-                        errors={
-                          errors.firstName ? [errors.firstName] : []
-                        }
-                      />
-                    </FieldContent>
-                  </Field>
+                    <Input
+                      id="firstName"
+                      type="text"
+                      {...register('firstName')}
+                      placeholder="John"
+                      className="h-11 bg-slate-900/70 border-slate-800/70 text-slate-100 placeholder:text-slate-500 rounded-xl focus:border-blue-500/50 focus:ring-2 focus:ring-blue-500/20"
+                    />
+                    {errors.firstName && (
+                      <FieldError className="text-red-400 text-xs">
+                        {errors.firstName.message}
+                      </FieldError>
+                    )}
+                  </div>
 
-                  <Field>
-                    <FieldLabel htmlFor="lastName">
+                  <div className="space-y-2">
+                    <FieldLabel htmlFor="lastName" className="text-sm font-medium text-slate-300">
                       Last Name
                     </FieldLabel>
-                    <FieldContent>
-                      <Input
-                        id="lastName"
-                        type="text"
-                        {...register('lastName')}
-                        placeholder="Doe"
-                      />
-                      <FieldError
-                        errors={
-                          errors.lastName ? [errors.lastName] : []
-                        }
-                      />
-                    </FieldContent>
-                  </Field>
+                    <Input
+                      id="lastName"
+                      type="text"
+                      {...register('lastName')}
+                      placeholder="Doe"
+                      className="h-11 bg-slate-900/70 border-slate-800/70 text-slate-100 placeholder:text-slate-500 rounded-xl focus:border-blue-500/50 focus:ring-2 focus:ring-blue-500/20"
+                    />
+                    {errors.lastName && (
+                      <FieldError className="text-red-400 text-xs">
+                        {errors.lastName.message}
+                      </FieldError>
+                    )}
+                  </div>
                 </div>
 
-                <Field>
-                  <FieldLabel htmlFor="email">Email</FieldLabel>
-                  <FieldContent>
+                <div className="space-y-2">
+                  <FieldLabel htmlFor="email" className="text-sm font-medium text-slate-300">
+                    Email Address
+                  </FieldLabel>
+                  <Input
+                    id="email"
+                    type="email"
+                    {...register('email')}
+                    placeholder="john.doe@example.com"
+                    className="h-11 bg-slate-900/70 border-slate-800/70 text-slate-100 placeholder:text-slate-500 rounded-xl focus:border-blue-500/50 focus:ring-2 focus:ring-blue-500/20"
+                  />
+                  {errors.email && (
+                    <FieldError className="text-red-400 text-xs">
+                      {errors.email.message}
+                    </FieldError>
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  <FieldLabel htmlFor="password" className="text-sm font-medium text-slate-300">
+                    Password
+                  </FieldLabel>
+                  <div className="relative">
                     <Input
-                      id="email"
-                      type="email"
-                      {...register('email')}
-                      placeholder="john.doe@example.com"
+                      id="password"
+                      type={showPassword ? 'text' : 'password'}
+                      {...register('password')}
+                      placeholder="••••••••"
+                      className="h-11 pr-10 bg-slate-900/70 border-slate-800/70 text-slate-100 placeholder:text-slate-500 rounded-xl focus:border-blue-500/50 focus:ring-2 focus:ring-blue-500/20"
                     />
-                    <FieldError
-                      errors={errors.email ? [errors.email] : []}
-                    />
-                  </FieldContent>
-                </Field>
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-300 focus:outline-none transition-colors">
+                      {showPassword ? (
+                        <EyeOff className="w-5 h-5" />
+                      ) : (
+                        <Eye className="w-5 h-5" />
+                      )}
+                    </button>
+                  </div>
+                  {errors.password && (
+                    <FieldError className="text-red-400 text-xs">
+                      {errors.password.message}
+                    </FieldError>
+                  )}
+                </div>
 
-                <Field>
-                  <FieldLabel htmlFor="password">Password</FieldLabel>
-                  <FieldContent>
-                    <div className="relative">
-                      <Input
-                        id="password"
-                        type={showPassword ? 'text' : 'password'}
-                        {...register('password')}
-                        placeholder="••••••••"
-                        className="pr-10"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none">
-                        {showPassword ? (
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            strokeWidth={1.5}
-                            stroke="currentColor"
-                            className="w-5 h-5">
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88"
-                            />
-                          </svg>
-                        ) : (
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            strokeWidth={1.5}
-                            stroke="currentColor"
-                            className="w-5 h-5">
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"
-                            />
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                            />
-                          </svg>
-                        )}
-                      </button>
-                    </div>
-                    <FieldError
-                      errors={
-                        errors.password ? [errors.password] : []
-                      }
-                    />
-                  </FieldContent>
-                </Field>
-
-                <Field>
-                  <FieldLabel htmlFor="confirmPassword">
+                <div className="space-y-2">
+                  <FieldLabel htmlFor="confirmPassword" className="text-sm font-medium text-slate-300">
                     Confirm Password
                   </FieldLabel>
-                  <FieldContent>
-                    <div className="relative">
-                      <Input
-                        id="confirmPassword"
-                        type={
-                          showConfirmPassword ? 'text' : 'password'
-                        }
-                        {...register('confirmPassword')}
-                        placeholder="••••••••"
-                        className="pr-10"
-                      />
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setShowConfirmPassword(!showConfirmPassword)
-                        }
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none">
-                        {showConfirmPassword ? (
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            strokeWidth={1.5}
-                            stroke="currentColor"
-                            className="w-5 h-5">
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88"
-                            />
-                          </svg>
-                        ) : (
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            strokeWidth={1.5}
-                            stroke="currentColor"
-                            className="w-5 h-5">
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"
-                            />
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                            />
-                          </svg>
-                        )}
-                      </button>
-                    </div>
-                    <FieldError
-                      errors={
-                        errors.confirmPassword
-                          ? [errors.confirmPassword]
-                          : []
-                      }
+                  <div className="relative">
+                    <Input
+                      id="confirmPassword"
+                      type={showConfirmPassword ? 'text' : 'password'}
+                      {...register('confirmPassword')}
+                      placeholder="••••••••"
+                      className="h-11 pr-10 bg-slate-900/70 border-slate-800/70 text-slate-100 placeholder:text-slate-500 rounded-xl focus:border-blue-500/50 focus:ring-2 focus:ring-blue-500/20"
                     />
-                  </FieldContent>
-                </Field>
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-300 focus:outline-none transition-colors">
+                      {showConfirmPassword ? (
+                        <EyeOff className="w-5 h-5" />
+                      ) : (
+                        <Eye className="w-5 h-5" />
+                      )}
+                    </button>
+                  </div>
+                  {errors.confirmPassword && (
+                    <FieldError className="text-red-400 text-xs">
+                      {errors.confirmPassword.message}
+                    </FieldError>
+                  )}
+                </div>
 
-                <Field>
-                  <FieldLabel htmlFor="role">I am a *</FieldLabel>
-                  <FieldContent>
-                    <select
-                      id="role"
-                      {...register('role')}
-                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
-                      <option value="">Select role...</option>
-                      <option value="student">Student</option>
-                      <option value="organizer">
-                        Event Organizer
-                      </option>
-                    </select>
-                    <FieldError
-                      errors={errors.role ? [errors.role] : []}
+                <div className="space-y-2">
+                  <FieldLabel htmlFor="role" className="text-sm font-medium text-slate-300">
+                    I am a
+                  </FieldLabel>
+                  <select
+                    id="role"
+                    {...register('role')}
+                    className="flex h-11 w-full rounded-xl border border-slate-800/70 bg-slate-900/70 px-3 py-2 text-sm text-slate-100 ring-offset-background placeholder:text-slate-500 focus:border-blue-500/50 focus:outline-none focus:ring-2 focus:ring-blue-500/20 disabled:cursor-not-allowed disabled:opacity-50">
+                    <option value="" className="bg-slate-900 text-slate-400">Select role...</option>
+                    <option value="student" className="bg-slate-900 text-slate-100">Student</option>
+                    <option value="organizer" className="bg-slate-900 text-slate-100">
+                      Event Organizer
+                    </option>
+                  </select>
+                  {errors.role && (
+                    <FieldError className="text-red-400 text-xs">
+                      {errors.role.message}
+                    </FieldError>
+                  )}
+                </div>
+
+                {selectedRole === 'organizer' && (
+                  <div className="space-y-2">
+                    <FieldLabel htmlFor="organizationName" className="text-sm font-medium text-slate-300">
+                      Organization Name <span className="text-slate-500 font-normal">(Optional)</span>
+                    </FieldLabel>
+                    <Input
+                      id="organizationName"
+                      type="text"
+                      {...register('organizationName')}
+                      placeholder="e.g., Computer Science Club"
+                      className="h-11 bg-slate-900/70 border-slate-800/70 text-slate-100 placeholder:text-slate-500 rounded-xl focus:border-blue-500/50 focus:ring-2 focus:ring-blue-500/20"
                     />
-                  </FieldContent>
-                </Field>
+                    {errors.organizationName && (
+                      <FieldError className="text-red-400 text-xs">
+                        {errors.organizationName.message}
+                      </FieldError>
+                    )}
+                    <p className="text-xs text-slate-400">
+                      This name will be displayed as the event organizer instead of your personal name
+                    </p>
+                  </div>
+                )}
 
                 <Button
                   type="submit"
-                  className="w-full h-12 text-base bg-blue-600 hover:bg-blue-700 mt-6"
+                  className="w-full h-12 text-base bg-blue-600 hover:bg-blue-500 text-white rounded-full shadow-lg shadow-blue-500/30 transition-all hover:scale-105 mt-6"
                   disabled={loading}>
-                  {loading ? 'Creating account...' : 'Create Account'}
+                  {loading ? (
+                    <>
+                      <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2" />
+                      Creating account...
+                    </>
+                  ) : (
+                    <>
+                      <UserPlus className="w-5 h-5 mr-2" />
+                      Create Account
+                    </>
+                  )}
                 </Button>
 
                 <div className="relative my-6">
                   <div className="absolute inset-0 flex items-center">
-                    <div className="w-full border-t border-gray-300 dark:border-gray-700"></div>
+                    <div className="w-full border-t border-slate-800/70"></div>
                   </div>
                   <div className="relative flex justify-center text-sm">
-                    <span className="px-2 bg-white dark:bg-gray-800 text-gray-500">
+                    <span className="px-3 bg-slate-950/70 text-slate-400">
                       Already have an account?
                     </span>
                   </div>
                 </div>
 
                 <Link href="/signin">
-                  <Button variant="outline" className="w-full h-12 text-base border-2">
+                  <Button
+                    variant="outline"
+                    className="w-full h-12 text-base border-slate-700 text-slate-300 bg-slate-950/70 hover:bg-slate-900 hover:border-slate-600 hover:text-slate-100 rounded-full transition-all"
+                    type="button">
+                    <LogIn className="w-5 h-5 mr-2" />
                     Sign In
                   </Button>
                 </Link>
@@ -379,6 +374,10 @@ function SignUp() {
             </CardContent>
           </Card>
         </div>
+
+        <p className="text-center text-xs text-slate-500 mt-6">
+          By creating an account, you agree to our Terms of Service and Privacy Policy
+        </p>
       </div>
     </main>
   );

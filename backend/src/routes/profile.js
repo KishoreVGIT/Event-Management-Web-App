@@ -36,7 +36,8 @@ router.get('/me', authenticate, async (req, res) => {
           e.category,
           e.image_url,
           e.status,
-          u.name as organizer_name
+          u.name as organizer_name,
+          u.organization_name
         FROM rsvps r
         JOIN events e ON r.event_id = e.id
         JOIN users u ON e.organizer_id = u.id
@@ -58,7 +59,7 @@ router.get('/me', authenticate, async (req, res) => {
           category: row.category,
           imageUrl: row.image_url,
           status: row.status,
-          organizerName: row.organizer_name
+          organizerName: row.organization_name || row.organizer_name
         }
       }));
     }

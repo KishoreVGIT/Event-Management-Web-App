@@ -11,7 +11,7 @@ const JWT_SECRET =
 
 router.post('/signup', authLimiter, async (req, res) => {
   try {
-    const { firstName, lastName, email, password, role } = req.body;
+    const { firstName, lastName, email, password, role, organizationName } = req.body;
 
     if (!firstName || !lastName || !email || !password) {
       return res
@@ -33,12 +33,13 @@ router.post('/signup', authLimiter, async (req, res) => {
     const passwordHash = await bcrypt.hash(password, 10);
 
     const result = await query(
-      'INSERT INTO users (name, email, "passwordHash", role) VALUES ($1, $2, $3, $4) RETURNING id, name, email, role',
+      'INSERT INTO users (name, email, "passwordHash", role, organization_name) VALUES ($1, $2, $3, $4, $5) RETURNING id, name, email, role, organization_name',
       [
         `${firstName} ${lastName}`,
         email,
         passwordHash,
         role || 'student',
+        organizationName || null,
       ]
     );
 
@@ -58,6 +59,7 @@ router.post('/signup', authLimiter, async (req, res) => {
         name: user.name,
         email: user.email,
         role: user.role,
+        organizationName: user.organization_name,
       },
     });
   } catch (error) {
@@ -77,7 +79,7 @@ router.post('/signin', authLimiter, async (req, res) => {
     }
 
     const result = await query(
-      'SELECT id, name, email, "passwordHash", role FROM users WHERE email = $1',
+      'SELECT id, name, email, "passwordHash", role, organization_name FROM users WHERE email = $1',
       [email]
     );
 
@@ -114,6 +116,7 @@ router.post('/signin', authLimiter, async (req, res) => {
         name: user.name,
         email: user.email,
         role: user.role,
+        organizationName: user.organization_name,
       },
     });
   } catch (error) {
@@ -133,7 +136,7 @@ router.get('/me', async (req, res) => {
     const decoded = jwt.verify(token, JWT_SECRET);
 
     const result = await query(
-      'SELECT id, name, email, role FROM users WHERE id = $1',
+      'SELECT id, name, email, role, organization_name FROM users WHERE id = $1',
       [decoded.userId]
     );
 
@@ -149,6 +152,7 @@ router.get('/me', async (req, res) => {
         name: user.name,
         email: user.email,
         role: user.role,
+        organizationName: user.organization_name,
       },
     });
   } catch (error) {

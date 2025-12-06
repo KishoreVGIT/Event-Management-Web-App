@@ -17,7 +17,7 @@ router.get('/', async (req, res) => {
       SELECT
         e.id, e.title, e.description, e.start_date, e.end_date, e.user_id, e."createdAt", e."updatedAt",
         e.capacity, e.location, e.category, e.image_url, e.status,
-        u.id as organizer_id, u.name as organizer_name, u.email as organizer_email,
+        u.id as organizer_id, u.name as organizer_name, u.email as organizer_email, u.organization_name,
         COUNT(ea.id)::int as attendee_count
       FROM events e
       JOIN users u ON e.user_id = u.id
@@ -44,6 +44,7 @@ router.get('/', async (req, res) => {
         id: row.organizer_id,
         name: row.organizer_name,
         email: row.organizer_email,
+        organizationName: row.organization_name,
       },
       attendeeCount: row.attendee_count,
       attendees: [],
@@ -65,7 +66,7 @@ router.get('/:id', async (req, res) => {
       SELECT
         e.id, e.title, e.description, e.start_date, e.end_date, e.user_id, e."createdAt", e."updatedAt",
         e.capacity, e.location, e.category, e.image_url, e.status, e.cancelled_at, e.cancellation_reason,
-        u.id as organizer_id, u.name as organizer_name, u.email as organizer_email
+        u.id as organizer_id, u.name as organizer_name, u.email as organizer_email, u.organization_name
       FROM events e
       JOIN users u ON e.user_id = u.id
       WHERE e.id = $1
@@ -91,6 +92,15 @@ router.get('/:id', async (req, res) => {
       [id]
     );
 
+    // Get time slots if they exist
+    const timeSlotsResult = await query(
+      `SELECT id, day_date, start_time, end_time
+       FROM event_time_slots
+       WHERE event_id = $1
+       ORDER BY day_date ASC`,
+      [id]
+    );
+
     const event = {
       id: eventRow.id,
       title: eventRow.title,
@@ -111,7 +121,14 @@ router.get('/:id', async (req, res) => {
         id: eventRow.organizer_id,
         name: eventRow.organizer_name,
         email: eventRow.organizer_email,
+        organizationName: eventRow.organization_name,
       },
+      timeSlots: timeSlotsResult.rows.map((slot) => ({
+        id: slot.id,
+        date: slot.day_date,
+        startTime: slot.start_time,
+        endTime: slot.end_time,
+      })),
       attendees: attendeesResult.rows.map((a) => ({
         id: a.id,
         userId: a.user_id,
@@ -214,6 +231,7 @@ router.post('/', authenticate, requireOrganizer, async (req, res) => {
       location,
       category,
       imageUrl,
+      timeSlots,
     } = req.body;
 
     if (!title) {
@@ -262,8 +280,19 @@ router.post('/', authenticate, requireOrganizer, async (req, res) => {
 
     const event = result.rows[0];
 
+    // Insert time slots if provided
+    if (timeSlots && Array.isArray(timeSlots) && timeSlots.length > 0) {
+      for (const slot of timeSlots) {
+        await query(
+          `INSERT INTO event_time_slots (event_id, day_date, start_time, end_time)
+           VALUES ($1, $2, $3, $4)`,
+          [event.id, slot.date, slot.startTime, slot.endTime]
+        );
+      }
+    }
+
     const userResult = await query(
-      'SELECT id, name, email FROM users WHERE id = $1',
+      'SELECT id, name, email, organization_name FROM users WHERE id = $1',
       [req.user.userId]
     );
 
@@ -304,6 +333,7 @@ router.put(
         location,
         category,
         imageUrl,
+        timeSlots,
       } = req.body;
 
       const existingEvent = await query(
@@ -364,8 +394,25 @@ router.put(
 
       const event = result.rows[0];
 
+      // Update time slots if provided
+      if (timeSlots !== undefined) {
+        // Delete existing time slots
+        await query('DELETE FROM event_time_slots WHERE event_id = $1', [id]);
+
+        // Insert new time slots
+        if (Array.isArray(timeSlots) && timeSlots.length > 0) {
+          for (const slot of timeSlots) {
+            await query(
+              `INSERT INTO event_time_slots (event_id, day_date, start_time, end_time)
+               VALUES ($1, $2, $3, $4)`,
+              [id, slot.date, slot.startTime, slot.endTime]
+            );
+          }
+        }
+      }
+
       const userResult = await query(
-        'SELECT id, name, email FROM users WHERE id = $1',
+        'SELECT id, name, email, organization_name FROM users WHERE id = $1',
         [event.user_id]
       );
 
