@@ -46,15 +46,21 @@ export function AddToCalendar({ event }) {
   };
 
   return (
-    <div className="relative inline-block">
+    <div className="relative inline-block w-full">
       <Button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2"
+        className="flex w-full items-center justify-between gap-2"
         variant="outline"
       >
-        <Calendar className="w-4 h-4" />
-        Add to Calendar
-        <ChevronDown className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+        <span className="flex items-center gap-2">
+          <Calendar className="w-4 h-4" />
+          Add to Calendar
+        </span>
+        <ChevronDown
+          className={`w-4 h-4 transition-transform ${
+            isOpen ? 'rotate-180' : ''
+          }`}
+        />
       </Button>
 
       {isOpen && (
@@ -65,19 +71,13 @@ export function AddToCalendar({ event }) {
             onClick={() => setIsOpen(false)}
           />
 
-          {/* Dropdown Menu */}
-          <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-800 rounded-md shadow-lg z-50 border border-gray-200 dark:border-gray-700">
+          {/* Dropdown Menu (opens upward now) */}
+          <div className="absolute right-0 bottom-full mb-2 w-56 bg-white dark:bg-gray-800 rounded-md shadow-lg z-50 border border-gray-200 dark:border-gray-700">
             <div className="py-1">
               <button
                 onClick={handleGoogleCalendar}
                 className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-3"
               >
-                <svg className="w-4 h-4" viewBox="0 0 24 24">
-                  <path
-                    fill="currentColor"
-                    d="M12,2C6.5,2,2,6.5,2,12s4.5,10,10,10s10-4.5,10-10S17.5,2,12,2z M13,17h-2v-6h2V17z M13,9h-2V7h2V9z"
-                  />
-                </svg>
                 Google Calendar
               </button>
 
@@ -85,12 +85,6 @@ export function AddToCalendar({ event }) {
                 onClick={handleOutlookCalendar}
                 className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-3"
               >
-                <svg className="w-4 h-4" viewBox="0 0 24 24">
-                  <path
-                    fill="currentColor"
-                    d="M7,2H17A2,2,0,0,1,19,4V20A2,2,0,0,1,17,22H7A2,2,0,0,1,5,20V4A2,2,0,0,1,7,2M7,4V8H17V4H7M7,10V20H17V10H7Z"
-                  />
-                </svg>
                 Outlook Calendar
               </button>
 
@@ -98,12 +92,6 @@ export function AddToCalendar({ event }) {
                 onClick={handleYahooCalendar}
                 className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-3"
               >
-                <svg className="w-4 h-4" viewBox="0 0 24 24">
-                  <path
-                    fill="currentColor"
-                    d="M12,2A10,10,0,1,0,22,12,10,10,0,0,0,12,2Zm0,18a8,8,0,1,1,8-8A8,8,0,0,1,12,20Z"
-                  />
-                </svg>
                 Yahoo Calendar
               </button>
 
