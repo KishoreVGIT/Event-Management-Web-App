@@ -149,6 +149,61 @@ router.get('/:id', async (req, res) => {
   }
 });
 
+// Get all attendees for an event (organizer only)
+router.get('/:id/attendees', authenticate, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user.id;
+
+    // Check if user is the organizer of this event or an admin
+    const eventResult = await query(
+      'SELECT user_id FROM events WHERE id = $1',
+      [id]
+    );
+
+    if (eventResult.rows.length === 0) {
+      return res.status(404).json({ error: 'Event not found' });
+    }
+
+    const event = eventResult.rows[0];
+    if (event.user_id !== userId && req.user.role !== 'admin') {
+      return res.status(403).json({ error: 'Not authorized to view attendees' });
+    }
+
+    // Fetch all attendees
+    const attendeesResult = await query(
+      `SELECT
+        ea.id,
+        ea.status,
+        ea."createdAt" as rsvp_date,
+        u.id as user_id,
+        u.name as user_name,
+        u.email as user_email
+      FROM event_attendees ea
+      JOIN users u ON ea.user_id = u.id
+      WHERE ea.event_id = $1
+      ORDER BY ea."createdAt" ASC`,
+      [id]
+    );
+
+    const attendees = attendeesResult.rows.map((row) => ({
+      id: row.id,
+      status: row.status,
+      rsvpDate: row.rsvp_date,
+      user: {
+        id: row.user_id,
+        name: row.user_name,
+        email: row.user_email,
+      },
+    }));
+
+    res.json(attendees);
+  } catch (error) {
+    console.error('Error fetching attendees:', error);
+    res.status(500).json({ error: 'Failed to fetch attendees' });
+  }
+});
+
 router.get(
   '/organizer/my-events',
   authenticate,

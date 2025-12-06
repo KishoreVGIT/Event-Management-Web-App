@@ -14,6 +14,7 @@ import { Button } from '@/components/ui/button';
 import { useAuth } from '@/lib/auth-context';
 import { PostponeEventDialog } from '@/components/postpone-event-dialog';
 import { CancelEventDialog } from '@/components/cancel-event-dialog';
+import { AttendeesModal } from '@/components/attendees-modal';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 
@@ -24,6 +25,7 @@ export default function OrganizerDashboard() {
   const [loading, setLoading] = useState(true);
   const [postponeDialogOpen, setPostponeDialogOpen] = useState(false);
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
+  const [attendeesModalOpen, setAttendeesModalOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState(null);
 
   useEffect(() => {
@@ -80,6 +82,11 @@ export default function OrganizerDashboard() {
   const handleCancelSuccess = (result) => {
     alert(`Event cancelled successfully! ${result.emailsSent} attendees notified.`);
     fetchMyEvents(); // Refresh events
+  };
+
+  const handleViewAttendees = (event) => {
+    setSelectedEvent(event);
+    setAttendeesModalOpen(true);
   };
 
   const handleDelete = async (eventId, eventTitle, eventStatus) => {
@@ -263,9 +270,11 @@ export default function OrganizerDashboard() {
                       </CardDescription>
                     </div>
                     <div className="flex flex-col items-end gap-2">
-                      <span className="px-3 py-1 bg-blue-500/10 border border-blue-500/30 text-blue-300 rounded-full text-sm font-medium whitespace-nowrap">
+                      <button
+                        onClick={() => handleViewAttendees(event)}
+                        className="px-3 py-1 bg-blue-500/10 border border-blue-500/30 text-blue-300 rounded-full text-sm font-medium whitespace-nowrap hover:bg-blue-500/20 hover:border-blue-500/50 transition-colors cursor-pointer">
                         {event.attendeeCount} RSVPs
-                      </span>
+                      </button>
                       {event.status && event.status !== 'active' && (
                         <span
                           className={`px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap ${
@@ -398,6 +407,16 @@ export default function OrganizerDashboard() {
           open={cancelDialogOpen}
           onOpenChange={setCancelDialogOpen}
           onSuccess={handleCancelSuccess}
+        />
+      )}
+
+      {/* Attendees Modal */}
+      {selectedEvent && (
+        <AttendeesModal
+          event={selectedEvent}
+          open={attendeesModalOpen}
+          onOpenChange={setAttendeesModalOpen}
+          getToken={getToken}
         />
       )}
     </div>

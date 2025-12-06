@@ -8,16 +8,10 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { FieldLabel, FieldError } from '@/components/ui/field';
 import { useAuth } from '@/lib/auth-context';
-import { Calendar, Eye, EyeOff, LogIn, Sparkles } from 'lucide-react';
+import { Eye, EyeOff, LogIn, Sparkles } from 'lucide-react';
 
 const signinSchema = yup.object().shape({
   email: yup
@@ -64,14 +58,6 @@ export default function SignInPage() {
       <div className="w-full max-w-md relative z-10">
         {/* Logo and Title */}
         <div className="text-center mb-8">
-          <div className="flex items-center justify-center space-x-2 mb-4">
-            <div className="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/30">
-              <Calendar className="w-7 h-7 text-white" />
-            </div>
-            <span className="text-2xl font-bold text-slate-50">
-              Campus Connect
-            </span>
-          </div>
           <h1 className="text-3xl sm:text-4xl font-bold text-slate-50 mb-2">
             Welcome Back
           </h1>
@@ -92,7 +78,9 @@ export default function SignInPage() {
               )}
 
               <div className="space-y-2">
-                <FieldLabel htmlFor="email" className="text-sm font-medium text-slate-300">
+                <FieldLabel
+                  htmlFor="email"
+                  className="text-sm font-medium text-slate-300">
                   Email Address
                 </FieldLabel>
                 <Input
@@ -103,12 +91,16 @@ export default function SignInPage() {
                   className="h-12 bg-slate-900/70 border-slate-800/70 text-slate-100 placeholder:text-slate-500 rounded-xl focus:border-blue-500/50 focus:ring-2 focus:ring-blue-500/20"
                 />
                 {errors.email && (
-                  <FieldError className="text-red-400">{errors.email.message}</FieldError>
+                  <FieldError className="text-red-400">
+                    {errors.email.message}
+                  </FieldError>
                 )}
               </div>
 
               <div className="space-y-2">
-                <FieldLabel htmlFor="password" className="text-sm font-medium text-slate-300">
+                <FieldLabel
+                  htmlFor="password"
+                  className="text-sm font-medium text-slate-300">
                   Password
                 </FieldLabel>
                 <div className="relative">
@@ -131,7 +123,9 @@ export default function SignInPage() {
                   </button>
                 </div>
                 {errors.password && (
-                  <FieldError className="text-red-400">{errors.password.message}</FieldError>
+                  <FieldError className="text-red-400">
+                    {errors.password.message}
+                  </FieldError>
                 )}
               </div>
 
@@ -177,7 +171,8 @@ export default function SignInPage() {
         </Card>
 
         <p className="text-center text-xs text-slate-500 mt-6">
-          By signing in, you agree to our Terms of Service and Privacy Policy
+          By signing in, you agree to our Terms of Service and Privacy
+          Policy
         </p>
       </div>
     </div>
