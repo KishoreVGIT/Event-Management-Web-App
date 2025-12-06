@@ -14,8 +14,7 @@ import { Button } from '@/components/ui/button';
 import { useAuth } from '@/lib/auth-context';
 import { toast } from 'sonner';
 import { Calendar, Users, UserCircle } from 'lucide-react';
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+import { API_URL } from '@/lib/constants';
 
 export function EventsShowcase() {
   const [events, setEvents] = useState([]);

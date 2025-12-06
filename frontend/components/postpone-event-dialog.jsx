@@ -16,6 +16,7 @@ import {
 } from '@/components/ui/dialog';
 import { DateTimeRangePicker } from '@/components/ui/date-time-range-picker';
 import { FieldError } from '@/components/ui/field';
+import { API_URL } from '@/lib/constants';
 
 const postponeSchema = yup.object().shape({
   newStartDate: yup.string().required('New start date is required'),
@@ -28,8 +29,6 @@ const postponeSchema = yup.object().shape({
       return new Date(value) > new Date(newStartDate);
     }),
 });
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 
 export function PostponeEventDialog({ event, open, onOpenChange, onSuccess }) {
   const [loading, setLoading] = useState(false);
