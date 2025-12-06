@@ -62,7 +62,7 @@ export default function EventDetailPage() {
       if (!token) return;
 
       const response = await fetch(
-        `${API_URL}/api/events/${eventId}/rsvp/status`,
+        `${API_URL}/api/rsvp/check/${eventId}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -94,7 +94,7 @@ export default function EventDetailPage() {
     try {
       const token = getToken();
       const response = await fetch(
-        `${API_URL}/api/events/${eventId}/rsvp`,
+        `${API_URL}/api/rsvp/${eventId}`,
         {
           method: 'POST',
           headers: {
@@ -128,7 +128,7 @@ export default function EventDetailPage() {
     try {
       const token = getToken();
       const response = await fetch(
-        `${API_URL}/api/events/${eventId}/rsvp`,
+        `${API_URL}/api/rsvp/${eventId}`,
         {
           method: 'DELETE',
           headers: {
