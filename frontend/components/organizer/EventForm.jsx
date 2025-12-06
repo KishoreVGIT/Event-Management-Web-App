@@ -251,11 +251,11 @@ export function EventForm({
 
       {/* Time Slots for Multi-Day Events (Only if multi-day) */}
       {isMultiDay && (
-        <div className="space-y-4 p-4 border border-gray-200 dark:border-slate-800 rounded-lg bg-gray-50 dark:bg-slate-900/50">
+        <div className="space-y-4 p-4 border border-slate-800 rounded-xl bg-slate-900/50">
           <div className="flex items-center justify-between">
             <div>
-              <FieldLabel>Different Times for Each Day</FieldLabel>
-              <p className="text-xs text-gray-500 dark:text-slate-400 mt-1">
+              <FieldLabel className="text-slate-200">Different Times for Each Day</FieldLabel>
+              <p className="text-xs text-slate-400 mt-1">
                 Specify different time ranges for each day
               </p>
             </div>
@@ -263,7 +263,7 @@ export function EventForm({
               type="button"
               onClick={() => setUseTimeSlots(!useTimeSlots)}
               className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                useTimeSlots ? 'bg-blue-600' : 'bg-gray-200 dark:bg-slate-700'
+                useTimeSlots ? 'bg-blue-600' : 'bg-slate-700'
               }`}>
               <span
                 className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
@@ -278,10 +278,10 @@ export function EventForm({
               {timeSlots.map((slot, index) => (
                 <div
                   key={slot.date}
-                  className="grid grid-cols-3 gap-3 p-3 bg-white dark:bg-slate-950 rounded-md border border-gray-100 dark:border-slate-800">
+                  className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-3 bg-slate-950/50 rounded-lg border border-slate-800">
                   <div>
-                    <FieldLabel className="text-xs">Date</FieldLabel>
-                    <div className="text-sm font-medium text-gray-900 dark:text-slate-200 mt-1">
+                    <FieldLabel className="text-xs text-slate-400">Date</FieldLabel>
+                    <div className="text-sm font-medium text-slate-200 mt-1">
                       {new Date(slot.date).toLocaleDateString('en-US', {
                         weekday: 'short',
                         month: 'short',
@@ -292,7 +292,7 @@ export function EventForm({
                   <div>
                     <FieldLabel
                       htmlFor={`slot-start-${index}`}
-                      className="text-xs">
+                      className="text-xs text-slate-400">
                       Start Time
                     </FieldLabel>
                     <Input
@@ -302,13 +302,13 @@ export function EventForm({
                       onChange={(e) =>
                         updateTimeSlot(index, 'startTime', e.target.value)
                       }
-                      className="mt-1 h-9"
+                      className="mt-1 h-9 bg-slate-900 border-slate-700 text-slate-200"
                     />
                   </div>
                   <div>
                     <FieldLabel
                       htmlFor={`slot-end-${index}`}
-                      className="text-xs">
+                      className="text-xs text-slate-400">
                       End Time
                     </FieldLabel>
                     <Input
@@ -318,7 +318,7 @@ export function EventForm({
                       onChange={(e) =>
                         updateTimeSlot(index, 'endTime', e.target.value)
                       }
-                      className="mt-1 h-9"
+                      className="mt-1 h-9 bg-slate-900 border-slate-700 text-slate-200"
                     />
                   </div>
                 </div>

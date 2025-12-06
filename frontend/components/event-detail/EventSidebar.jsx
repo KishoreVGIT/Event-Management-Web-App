@@ -168,9 +168,11 @@ export function EventSidebar({
             </div>
           )}
 
-          <div className="pt-1">
-            <AddToCalendar event={event} />
-          </div>
+          {user && (
+            <div className="pt-1">
+              <AddToCalendar event={event} />
+            </div>
+          )}
         </CardContent>
       </Card>
     </aside>
