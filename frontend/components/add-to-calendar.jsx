@@ -66,7 +66,7 @@ export function AddToCalendar({ event }) {
           />
 
           {/* Dropdown Menu */}
-          <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-800 rounded-md shadow-lg z-20 border border-gray-200 dark:border-gray-700">
+          <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-800 rounded-md shadow-lg z-50 border border-gray-200 dark:border-gray-700">
             <div className="py-1">
               <button
                 onClick={handleGoogleCalendar}
