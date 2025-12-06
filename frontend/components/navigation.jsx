@@ -78,7 +78,7 @@ export function Navigation() {
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-1">
+          <div className="hidden lg:flex items-center space-x-1">
             {navLinks.map((link) => {
               const Icon = link.icon;
               const active = isActive(link.href);
@@ -99,7 +99,7 @@ export function Navigation() {
           </div>
 
           {/* Desktop Auth Buttons */}
-          <div className="hidden md:flex items-center space-x-3">
+          <div className="hidden lg:flex items-center space-x-3">
             {user ? (
               <>
                 <span className="text-sm text-slate-300 px-4 py-2 bg-slate-900/70 border border-slate-800/70 rounded-full backdrop-blur-sm">
@@ -134,7 +134,7 @@ export function Navigation() {
 
           {/* Mobile Menu Button */}
           <button
-            className="md:hidden p-2 rounded-xl hover:bg-slate-800/70 transition-colors"
+            className="lg:hidden p-2 rounded-xl hover:bg-slate-800/70 transition-colors"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
             {mobileMenuOpen ? (
               <X className="w-6 h-6 text-slate-300" />
@@ -147,7 +147,7 @@ export function Navigation() {
 
       {/* Mobile Menu */}
       {mobileMenuOpen && (
-        <div className="md:hidden border-t border-slate-800/70 bg-slate-950/95 backdrop-blur-xl">
+        <div className="lg:hidden border-t border-slate-800/70 bg-slate-950/95 backdrop-blur-xl">
           <div className="px-4 py-4 space-y-2">
             {navLinks.map((link) => {
               const Icon = link.icon;
@@ -179,7 +179,7 @@ export function Navigation() {
                   </div>
                   <Button
                     variant="outline"
-                    className="w-full justify-center rounded-full border-red-500/40 text-red-400 hover:bg-red-500/10 hover:text-red-300 hover:border-red-500/60"
+                    className="w-full justify-center rounded-full border-red-500/40 bg-red-500 hover:bg-red-500/10 hover:text-red-300 hover:border-red-500/60 text-white"
                     onClick={handleSignOut}>
                     Sign Out
                   </Button>

@@ -15,8 +15,7 @@ import { useAuth } from '@/lib/auth-context';
 import { PostponeEventDialog } from '@/components/postpone-event-dialog';
 import { CancelEventDialog } from '@/components/cancel-event-dialog';
 import { AttendeesModal } from '@/components/attendees-modal';
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+import { API_URL } from '@/lib/constants';
 
 export default function OrganizerDashboard() {
   const router = useRouter();
@@ -75,12 +74,16 @@ export default function OrganizerDashboard() {
   };
 
   const handlePostponeSuccess = (result) => {
-    alert(`Event postponed successfully! ${result.emailsSent} attendees notified.`);
+    alert(
+      `Event postponed successfully! ${result.emailsSent} attendees notified.`
+    );
     fetchMyEvents(); // Refresh events
   };
 
   const handleCancelSuccess = (result) => {
-    alert(`Event cancelled successfully! ${result.emailsSent} attendees notified.`);
+    alert(
+      `Event cancelled successfully! ${result.emailsSent} attendees notified.`
+    );
     fetchMyEvents(); // Refresh events
   };
 
@@ -105,12 +108,15 @@ export default function OrganizerDashboard() {
 
     try {
       const token = getToken();
-      const response = await fetch(`${API_URL}/api/events/${eventId}`, {
-        method: 'DELETE',
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await fetch(
+        `${API_URL}/api/events/${eventId}`,
+        {
+          method: 'DELETE',
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
       if (response.ok) {
         setEvents(events.filter((e) => e.id !== eventId));
@@ -187,7 +193,9 @@ export default function OrganizerDashboard() {
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-slate-950 via-slate-950 to-slate-900">
         <div className="flex flex-col items-center gap-4">
           <div className="w-14 h-14 rounded-full border-4 border-slate-700 border-t-blue-500 animate-spin" />
-          <p className="text-sm font-medium text-slate-300">Loading dashboard...</p>
+          <p className="text-sm font-medium text-slate-300">
+            Loading dashboard...
+          </p>
         </div>
       </div>
     );
@@ -230,8 +238,17 @@ export default function OrganizerDashboard() {
         ) : events.length === 0 ? (
           <div className="text-center py-20">
             <div className="w-20 h-20 bg-slate-900/60 border border-slate-800 rounded-3xl flex items-center justify-center mx-auto mb-4 shadow-xl shadow-blue-900/40">
-              <svg className="w-9 h-9 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              <svg
+                className="w-9 h-9 text-slate-400"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                />
               </svg>
             </div>
             <h3 className="text-xl font-semibold text-slate-50 mb-2">
@@ -264,9 +281,14 @@ export default function OrganizerDashboard() {
                 <CardHeader className="pb-3">
                   <div className="flex justify-between items-start gap-2">
                     <div className="flex-1">
-                      <CardTitle className="text-slate-50 line-clamp-1">{event.title}</CardTitle>
+                      <CardTitle className="text-slate-50 line-clamp-1">
+                        {event.title}
+                      </CardTitle>
                       <CardDescription className="text-slate-400 mt-1">
-                        {formatEventDate(event.startDate, event.endDate)}
+                        {formatEventDate(
+                          event.startDate,
+                          event.endDate
+                        )}
                       </CardDescription>
                     </div>
                     <div className="flex flex-col items-end gap-2">
@@ -329,7 +351,9 @@ export default function OrganizerDashboard() {
 
                     <div className="flex flex-col gap-2 pt-2">
                       <div className="flex gap-2">
-                        <Link href={`/events/${event.id}`} className="flex-1">
+                        <Link
+                          href={`/events/${event.id}`}
+                          className="flex-1">
                           <Button
                             variant="outline"
                             className="w-full border-slate-700 text-slate-300 bg-slate-950/70 hover:bg-slate-900 hover:border-slate-600 hover:text-slate-100 rounded-full"
@@ -354,15 +378,13 @@ export default function OrganizerDashboard() {
                       {event.status !== 'cancelled' && (
                         <div className="flex gap-2">
                           <Button
-                            variant="outline"
-                            className="flex-1 border-yellow-500/40 text-yellow-400 hover:bg-yellow-500/10 hover:text-yellow-300 hover:border-yellow-500/60 rounded-full"
+                            className="flex-1 bg-yellow-500 rounded-full text-white hover:bg-yellow-500/80"
                             size="sm"
                             onClick={() => handlePostpone(event)}>
                             Postpone
                           </Button>
                           <Button
-                            variant="outline"
-                            className="flex-1 border-red-500/40 text-red-400 hover:bg-red-500/10 hover:text-red-300 hover:border-red-500/60 rounded-full"
+                            className="flex-1 bg-red-500 rounded-full hover:bg-red-500/80"
                             size="sm"
                             onClick={() => handleCancelEvent(event)}>
                             Cancel Event
@@ -376,7 +398,11 @@ export default function OrganizerDashboard() {
                           className="w-full border-red-500/40 text-red-400 hover:bg-red-500/10 hover:text-red-300 hover:border-red-500/60 rounded-full"
                           size="sm"
                           onClick={() =>
-                            handleDelete(event.id, event.title, event.status)
+                            handleDelete(
+                              event.id,
+                              event.title,
+                              event.status
+                            )
                           }>
                           Delete Permanently
                         </Button>
@@ -414,6 +440,7 @@ export default function OrganizerDashboard() {
       {selectedEvent && (
         <AttendeesModal
           event={selectedEvent}
+          attendees={selectedEvent.attendees}
           open={attendeesModalOpen}
           onOpenChange={setAttendeesModalOpen}
           getToken={getToken}

@@ -6,7 +6,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Calendar, Users, UserCircle } from 'lucide-react';
 
 export function EventCard({
@@ -21,7 +20,8 @@ export function EventCard({
 }) {
   const statusStyles = {
     upcoming: 'bg-blue-500/90 text-white ring-2 ring-blue-400/60',
-    ongoing: 'bg-emerald-500/90 text-white ring-2 ring-emerald-400/60',
+    ongoing:
+      'bg-emerald-500/90 text-white ring-2 ring-emerald-400/60',
     past: 'bg-zinc-500/90 text-white ring-2 ring-zinc-400/60',
   };
 
@@ -58,7 +58,10 @@ export function EventCard({
         <div className="flex items-center gap-2 text-xs text-slate-400 mt-2">
           <UserCircle className="w-3.5 h-3.5" />
           <span>
-            by <span className="text-slate-300 font-medium">{event.user.organizationName || event.user.name}</span>
+            by{' '}
+            <span className="text-slate-300 font-medium">
+              {event.user.organizationName || event.user.name}
+            </span>
           </span>
         </div>
       </CardHeader>
@@ -100,8 +103,9 @@ export function EventCard({
           </div>
 
           <div className="flex gap-2">
-            {user && user.role === 'student' && (
-              rsvpStatus ? (
+            {user &&
+              user.role === 'student' &&
+              (rsvpStatus ? (
                 <button
                   onClick={() => onCancelRsvp(event.id)}
                   disabled={rsvpLoading}
@@ -115,8 +119,7 @@ export function EventCard({
                   className="px-3 py-1.5 text-xs font-medium rounded-full bg-blue-600 text-white hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
                   {rsvpLoading ? 'RSVPing...' : 'RSVP'}
                 </button>
-              )
-            )}
+              ))}
             <Link href={`/events/${event.id}`}>
               <button className="px-3 py-1.5 text-xs font-medium rounded-full border border-slate-700 text-slate-300 hover:bg-slate-900 hover:border-slate-600 hover:text-slate-100 transition-colors">
                 View

@@ -288,7 +288,8 @@ export default function EventDetailPage() {
     );
   }
 
-  const organizerName = event.user?.organizationName || event.user?.name || 'Organizer';
+  const organizerName =
+    event.user?.organizationName || event.user?.name || 'Organizer';
   const attendeeCount = event.attendeeCount ?? 0;
   const capacity = event.capacity ?? null;
 
@@ -385,7 +386,7 @@ export default function EventDetailPage() {
         <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,2fr)_minmax(260px,1fr)] gap-8 lg:gap-10">
           {/* Left column */}
           <section className="space-y-6">
-            <Card className="bg-slate-950/70 border-slate-800/70 shadow-2xl shadow-slate-950/60 backdrop-blur-xl rounded-2xl">
+            <Card className="bg-slate-950/70 border-slate-800/70 shadow-2xl shadow-slate-950/60 backdrop-blur-xl rounded-2xl pt-6">
               <CardHeader className="pb-4">
                 <CardTitle className="text-lg font-semibold text-slate-50">
                   About this event
@@ -448,7 +449,7 @@ export default function EventDetailPage() {
           {/* Right column – sticky sidebar */}
           <aside className="space-y-5 lg:space-y-6 lg:sticky lg:top-24 self-start">
             {/* Event details */}
-            <Card className="bg-slate-950/70 border-slate-800/70 backdrop-blur-xl shadow-xl rounded-2xl">
+            <Card className="bg-slate-950/70 border-slate-800/70 backdrop-blur-xl shadow-xl rounded-2xl pt-6">
               <CardHeader className="pb-3">
                 <CardTitle className="text-base font-semibold text-slate-50">
                   Event details
@@ -466,15 +467,22 @@ export default function EventDetailPage() {
                     </h4>
                     {event.timeSlots && event.timeSlots.length > 0 ? (
                       <div className="space-y-2">
-                        <p className="text-xs text-slate-400">Multi-day event with custom times:</p>
+                        <p className="text-xs text-slate-400">
+                          Multi-day event with custom times:
+                        </p>
                         {event.timeSlots.map((slot, index) => (
-                          <div key={index} className="text-xs sm:text-sm text-slate-300 p-2 rounded-lg bg-slate-900/50 border border-slate-800">
+                          <div
+                            key={index}
+                            className="text-xs sm:text-sm text-slate-300 p-2 rounded-lg bg-slate-900/50 border border-slate-800">
                             <div className="font-medium text-slate-200">
-                              {new Date(slot.date).toLocaleDateString('en-US', {
-                                weekday: 'short',
-                                month: 'short',
-                                day: 'numeric',
-                              })}
+                              {new Date(slot.date).toLocaleDateString(
+                                'en-US',
+                                {
+                                  weekday: 'short',
+                                  month: 'short',
+                                  day: 'numeric',
+                                }
+                              )}
                             </div>
                             <div className="text-slate-400 mt-0.5">
                               {slot.startTime} - {slot.endTime}

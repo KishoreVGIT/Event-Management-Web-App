@@ -155,50 +155,50 @@ export default function EventsPage() {
     const start = new Date(startDate);
     const end = endDate ? new Date(endDate) : null;
 
-    const formatOptions = {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
+    const dateOptions = {
+      weekday: 'short', // Mon, Tue...
+      month: 'short', // Dec
+      day: 'numeric', // 8
     };
 
     const timeOptions = {
-      hour: '2-digit',
+      hour: 'numeric',
       minute: '2-digit',
     };
 
-    if (end) {
-      const startDay = new Date(start);
-      startDay.setHours(0, 0, 0, 0);
-      const endDay = new Date(end);
-      endDay.setHours(0, 0, 0, 0);
-
-      if (endDay > startDay) {
-        return `${start.toLocaleDateString(
-          'en-US',
-          formatOptions
-        )} at ${start.toLocaleTimeString(
-          'en-US',
-          timeOptions
-        )} - ${end.toLocaleDateString(
-          'en-US',
-          formatOptions
-        )} at ${end.toLocaleTimeString('en-US', timeOptions)}`;
-      } else {
-        return `${start.toLocaleDateString(
-          'en-US',
-          formatOptions
-        )}, ${start.toLocaleTimeString(
-          'en-US',
-          timeOptions
-        )} - ${end.toLocaleTimeString('en-US', timeOptions)}`;
-      }
+    // No end date → single point in time
+    if (!end) {
+      return `${start.toLocaleDateString(
+        'en-US',
+        dateOptions
+      )} · ${start.toLocaleTimeString('en-US', timeOptions)}`;
     }
 
-    return `${start.toLocaleDateString(
+    const sameDay = start.toDateString() === end.toDateString();
+
+    // Single-day event → "Mon, Dec 8 · 6:00 PM – 9:00 PM"
+    if (sameDay) {
+      return `${start.toLocaleDateString(
+        'en-US',
+        dateOptions
+      )} · ${start.toLocaleTimeString(
+        'en-US',
+        timeOptions
+      )} – ${end.toLocaleTimeString('en-US', timeOptions)}`;
+    }
+
+    // Multi-day event → "Mon, Dec 8 – Thu, Dec 11 · 6:00 PM – 9:00 PM each day"
+    const dateRange = `${start.toLocaleDateString(
       'en-US',
-      formatOptions
-    )} at ${start.toLocaleTimeString('en-US', timeOptions)}`;
+      dateOptions
+    )} – ${end.toLocaleDateString('en-US', dateOptions)}`;
+
+    const timeRange = `${start.toLocaleTimeString(
+      'en-US',
+      timeOptions
+    )} – ${end.toLocaleTimeString('en-US', timeOptions)}`;
+
+    return `${dateRange} · ${timeRange} each day`;
   };
 
   const getEventStatus = (startDate, endDate) => {
@@ -223,7 +223,9 @@ export default function EventsPage() {
         (event) =>
           event.title.toLowerCase().includes(query) ||
           event.description?.toLowerCase().includes(query) ||
-          (event.user.organizationName || event.user.name).toLowerCase().includes(query)
+          (event.user.organizationName || event.user.name)
+            .toLowerCase()
+            .includes(query)
       );
     }
 
