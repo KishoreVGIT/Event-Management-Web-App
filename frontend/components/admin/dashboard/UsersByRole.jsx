@@ -9,18 +9,18 @@ export function UsersByRole({ usersByRole }) {
   if (!usersByRole) return null;
 
   return (
-    <Card className={'pt-6'}>
+    <Card className="bg-slate-950/70 border-slate-800/70 backdrop-blur-xl pt-6">
       <CardHeader>
-        <CardTitle>Users by Role</CardTitle>
+        <CardTitle className="text-slate-50">Users by Role</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="space-y-2">
           {usersByRole.map((item) => (
             <div
               key={item.role}
-              className="flex justify-between items-center p-2 bg-gray-50 dark:bg-gray-800 rounded">
-              <span className="capitalize font-medium">{item.role}</span>
-              <span className="text-gray-600 dark:text-gray-400">
+              className="flex justify-between items-center p-3 bg-slate-900/50 border border-slate-800 rounded-lg backdrop-blur-sm">
+              <span className="capitalize font-medium text-slate-200">{item.role}</span>
+              <span className="text-slate-400 font-mono bg-slate-800 px-2 py-0.5 rounded text-xs">
                 {item.count}
               </span>
             </div>
