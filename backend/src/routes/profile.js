@@ -1,17 +1,17 @@
 import express from 'express';
 import { query } from '../db.js';
-import { authenticateToken } from '../middleware/auth.js';
+import { authenticate } from '../middleware/auth.js';
 
 const router = express.Router();
 
 // Get current user's profile
-router.get('/me', authenticateToken, async (req, res) => {
+router.get('/me', authenticate, async (req, res) => {
   try {
     const userId = req.user.id;
 
     // Get user details
     const userResult = await query(
-      'SELECT id, email, name, role, created_at FROM users WHERE id = $1',
+      'SELECT id, email, name, role, organization_name, created_at FROM users WHERE id = $1',
       [userId]
     );
 
@@ -36,7 +36,8 @@ router.get('/me', authenticateToken, async (req, res) => {
           e.category,
           e.image_url,
           e.status,
-          u.name as organizer_name
+          u.name as organizer_name,
+          u.organization_name
         FROM rsvps r
         JOIN events e ON r.event_id = e.id
         JOIN users u ON e.organizer_id = u.id
@@ -58,7 +59,7 @@ router.get('/me', authenticateToken, async (req, res) => {
           category: row.category,
           imageUrl: row.image_url,
           status: row.status,
-          organizerName: row.organizer_name
+          organizerName: row.organization_name || row.organizer_name
         }
       }));
     }
@@ -111,21 +112,31 @@ router.get('/me', authenticateToken, async (req, res) => {
 });
 
 // Update current user's profile
-router.put('/me', authenticateToken, async (req, res) => {
+router.put('/me', authenticate, async (req, res) => {
   try {
     const userId = req.user.id;
-    const { name } = req.body;
+    const { name, organizationName } = req.body;
 
     // Validate input
     if (!name || name.trim().length < 2) {
       return res.status(400).json({ error: 'Name must be at least 2 characters' });
     }
 
+    // Build update query based on fields provided
+    let updateQuery = 'UPDATE users SET name = $1';
+    const params = [name.trim()];
+
+    // Add organization_name if provided
+    if (organizationName !== undefined) {
+      updateQuery += ', organization_name = $2';
+      params.push(organizationName && organizationName.trim() ? organizationName.trim() : null);
+    }
+
+    updateQuery += ` WHERE id = $${params.length + 1} RETURNING id, email, name, role, organization_name, created_at`;
+    params.push(userId);
+
     // Update user
-    const result = await query(
-      'UPDATE users SET name = $1 WHERE id = $2 RETURNING id, email, name, role, created_at',
-      [name.trim(), userId]
-    );
+    const result = await query(updateQuery, params);
 
     if (result.rows.length === 0) {
       return res.status(404).json({ error: 'User not found' });

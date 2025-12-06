@@ -71,7 +71,8 @@ export function AuthProvider({ children }) {
     lastName,
     email,
     password,
-    role = 'student'
+    role = 'student',
+    organizationName = null
   ) => {
     const response = await fetch(
       `${API_URL}/api/auth/signup`,
@@ -86,6 +87,7 @@ export function AuthProvider({ children }) {
           email,
           password,
           role,
+          organizationName,
         }),
       }
     );

@@ -96,86 +96,82 @@ export default function EventsCalendarPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
-        <p className="text-gray-600 dark:text-gray-400">Loading...</p>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-slate-950 via-slate-950 to-slate-900">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-14 h-14 rounded-full border-4 border-slate-700 border-t-blue-500 animate-spin" />
+          <p className="text-sm font-medium text-slate-300">Loading calendar...</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <nav className="bg-white dark:bg-gray-800 shadow">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16">
-            <div className="flex items-center">
-              <Link href="/">
-                <h1 className="text-2xl font-bold text-gray-900 dark:text-white cursor-pointer">
-                  Campus Connect
-                </h1>
-              </Link>
-            </div>
-            <div className="flex items-center space-x-4">
-              <Link href="/events">
-                <Button variant="outline">
-                  <List className="w-4 h-4 mr-2" />
-                  List View
-                </Button>
-              </Link>
-              {user && user.role === 'organizer' && (
-                <Link href="/organizer/dashboard">
-                  <Button>Organizer Dashboard</Button>
-                </Link>
-              )}
-              {!user ? (
-                <>
-                  <Link href="/signin">
-                    <Button variant="outline">Sign In</Button>
-                  </Link>
-                  <Link href="/signup">
-                    <Button>Sign Up</Button>
-                  </Link>
-                </>
-              ) : (
-                <div className="text-sm text-gray-700 dark:text-gray-300">
-                  Welcome, {user.name}
+    <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-950 to-slate-900">
+      {/* Background Pattern */}
+      <div className="fixed inset-0 bg-[linear-gradient(to_right,#1e293b_1px,transparent_1px),linear-gradient(to_bottom,#1e293b_1px,transparent_1px)] bg-[size:4rem_4rem] opacity-10" />
+
+      <main className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
+        {/* Header */}
+        <div className="mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
+            <div>
+              <h1 className="text-3xl sm:text-4xl font-bold text-slate-50 flex items-center gap-3 mb-2">
+                <div className="w-10 h-10 bg-blue-500/10 border border-blue-500/30 rounded-xl flex items-center justify-center">
+                  <CalendarIcon className="w-6 h-6 text-blue-400" />
                 </div>
-              )}
+                Events Calendar
+              </h1>
+              <p className="text-slate-400">View all campus events in calendar format</p>
             </div>
+            <Link href="/events">
+              <Button
+                variant="outline"
+                className="border-slate-700 text-slate-300 bg-slate-950/70 hover:bg-slate-900 hover:border-slate-600 hover:text-slate-100 rounded-full">
+                <List className="w-4 h-4 mr-2" />
+                List View
+              </Button>
+            </Link>
           </div>
         </div>
-      </nav>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <Card>
-          <CardHeader>
-            <div className="flex justify-between items-center">
-              <CardTitle className="flex items-center gap-2">
-                <CalendarIcon className="w-6 h-6" />
-                Events Calendar
+        <Card className="bg-slate-950/70 border-slate-800/70 backdrop-blur-xl rounded-2xl shadow-2xl shadow-blue-900/20">
+          <CardHeader className="border-b border-slate-800/70">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <CardTitle className="text-slate-50 text-lg">
+                {monthName}
               </CardTitle>
               <div className="flex items-center gap-2">
-                <Button variant="outline" onClick={goToToday}>
+                <Button
+                  variant="outline"
+                  onClick={goToToday}
+                  size="sm"
+                  className="border-slate-700 text-slate-300 bg-slate-950/70 hover:bg-slate-900 hover:border-slate-600 hover:text-slate-100 rounded-full">
                   Today
                 </Button>
-                <Button variant="outline" size="icon" onClick={previousMonth}>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={previousMonth}
+                  className="border-slate-700 text-slate-300 bg-slate-950/70 hover:bg-slate-900 hover:border-slate-600 hover:text-slate-100 rounded-full w-9 h-9 p-0">
                   <ChevronLeft className="w-4 h-4" />
                 </Button>
-                <div className="min-w-[200px] text-center font-semibold">
-                  {monthName}
-                </div>
-                <Button variant="outline" size="icon" onClick={nextMonth}>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={nextMonth}
+                  className="border-slate-700 text-slate-300 bg-slate-950/70 hover:bg-slate-900 hover:border-slate-600 hover:text-slate-100 rounded-full w-9 h-9 p-0">
                   <ChevronRight className="w-4 h-4" />
                 </Button>
               </div>
             </div>
           </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-7 gap-1">
+          <CardContent className="p-6">
+            <div className="grid grid-cols-7 gap-2">
               {/* Day headers */}
               {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
                 <div
                   key={day}
-                  className="p-2 text-center font-semibold text-gray-600 dark:text-gray-400">
+                  className="p-2 text-center font-semibold text-slate-400 text-sm">
                   {day}
                 </div>
               ))}
@@ -183,7 +179,7 @@ export default function EventsCalendarPage() {
               {/* Calendar days */}
               {days.map((day, index) => {
                 if (day === null) {
-                  return <div key={`empty-${index}`} className="p-2 min-h-[100px]" />;
+                  return <div key={`empty-${index}`} className="p-2 min-h-[120px]" />;
                 }
 
                 const dayEvents = getEventsForDay(day);
@@ -198,14 +194,14 @@ export default function EventsCalendarPage() {
                 return (
                   <div
                     key={day}
-                    className={`p-2 min-h-[100px] border rounded-lg ${
+                    className={`p-2 min-h-[120px] border rounded-xl transition-all ${
                       isToday
-                        ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-500'
-                        : 'border-gray-200 dark:border-gray-700'
+                        ? 'bg-blue-500/10 border-blue-500/30 shadow-lg shadow-blue-900/20'
+                        : 'bg-slate-900/30 border-slate-800/50 hover:border-slate-700'
                     }`}>
                     <div
-                      className={`text-sm font-semibold mb-1 ${
-                        isToday ? 'text-blue-600 dark:text-blue-400' : ''
+                      className={`text-sm font-semibold mb-2 ${
+                        isToday ? 'text-blue-400' : 'text-slate-300'
                       }`}>
                       {day}
                     </div>
@@ -215,13 +211,13 @@ export default function EventsCalendarPage() {
                           key={event.id}
                           href={`/events/${event.id}`}
                           className="block">
-                          <div className="text-xs p-1 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors truncate">
+                          <div className="text-xs p-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-500 transition-colors truncate shadow-sm">
                             {event.title}
                           </div>
                         </Link>
                       ))}
                       {dayEvents.length > 3 && (
-                        <div className="text-xs text-gray-500 dark:text-gray-400">
+                        <div className="text-xs text-slate-400 pl-1">
                           +{dayEvents.length - 3} more
                         </div>
                       )}
@@ -232,11 +228,12 @@ export default function EventsCalendarPage() {
             </div>
 
             {/* Events list for selected month */}
-            <div className="mt-8">
-              <h3 className="text-lg font-semibold mb-4">
+            <div className="mt-8 pt-8 border-t border-slate-800/70">
+              <h3 className="text-lg font-semibold mb-4 text-slate-50 flex items-center gap-2">
+                <List className="w-5 h-5 text-blue-400" />
                 All Events in {monthName}
               </h3>
-              <div className="space-y-2">
+              <div className="space-y-3">
                 {events
                   .filter((event) => {
                     if (!event.startDate) return false;
@@ -249,11 +246,13 @@ export default function EventsCalendarPage() {
                   .sort((a, b) => new Date(a.startDate) - new Date(b.startDate))
                   .map((event) => (
                     <Link key={event.id} href={`/events/${event.id}`}>
-                      <div className="p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer">
-                        <div className="flex justify-between items-start">
+                      <div className="p-4 border border-slate-800/50 rounded-xl hover:bg-slate-900/50 hover:border-slate-700 transition-all cursor-pointer group">
+                        <div className="flex justify-between items-start gap-4">
                           <div className="flex-1">
-                            <h4 className="font-semibold">{event.title}</h4>
-                            <p className="text-sm text-gray-600 dark:text-gray-400">
+                            <h4 className="font-semibold text-slate-50 group-hover:text-blue-400 transition-colors">
+                              {event.title}
+                            </h4>
+                            <p className="text-sm text-slate-400 mt-1">
                               {new Date(event.startDate).toLocaleDateString('en-US', {
                                 weekday: 'long',
                                 month: 'long',
@@ -263,14 +262,16 @@ export default function EventsCalendarPage() {
                               })}
                             </p>
                             {event.location && (
-                              <p className="text-sm text-gray-500 mt-1">{event.location}</p>
+                              <p className="text-sm text-slate-500 mt-1">{event.location}</p>
                             )}
                           </div>
                           <div className="flex flex-col items-end gap-2">
                             {event.category && (
-                              <Badge variant="secondary">{event.category}</Badge>
+                              <span className="px-3 py-1 text-xs font-medium bg-blue-500/10 border border-blue-500/30 text-blue-300 rounded-full">
+                                {event.category}
+                              </span>
                             )}
-                            <span className="text-sm text-gray-600 dark:text-gray-400">
+                            <span className="text-sm text-slate-400">
                               {event.attendeeCount}{' '}
                               {event.capacity ? `/ ${event.capacity}` : ''} attending
                             </span>
@@ -279,6 +280,21 @@ export default function EventsCalendarPage() {
                       </div>
                     </Link>
                   ))}
+                {events.filter((event) => {
+                  if (!event.startDate) return false;
+                  const eventDate = new Date(event.startDate);
+                  return (
+                    eventDate.getMonth() === currentDate.getMonth() &&
+                    eventDate.getFullYear() === currentDate.getFullYear()
+                  );
+                }).length === 0 && (
+                  <div className="text-center py-12">
+                    <div className="w-16 h-16 bg-slate-900/60 border border-slate-800 rounded-3xl flex items-center justify-center mx-auto mb-4">
+                      <CalendarIcon className="w-8 h-8 text-slate-400" />
+                    </div>
+                    <p className="text-slate-400">No events scheduled for this month</p>
+                  </div>
+                )}
               </div>
             </div>
           </CardContent>
