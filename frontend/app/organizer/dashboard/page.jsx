@@ -10,6 +10,7 @@ import { API_URL } from '@/lib/constants';
 import { DashboardHeader } from '@/components/organizer/dashboard/DashboardHeader';
 import { EmptyState } from '@/components/organizer/dashboard/EmptyState';
 import { EventsList } from '@/components/organizer/dashboard/EventsList';
+import { toast } from 'sonner';
 
 export default function OrganizerDashboard() {
   const router = useRouter();
@@ -26,7 +27,7 @@ export default function OrganizerDashboard() {
       if (!user) {
         router.push('/signin');
       } else if (user.role !== 'organizer' && user.role !== 'admin') {
-        alert('You must be an organizer to access this page');
+        toast.error('You must be an organizer to access this page');
         router.push('/events');
       } else {
         fetchMyEvents();
@@ -68,14 +69,14 @@ export default function OrganizerDashboard() {
   };
 
   const handlePostponeSuccess = (result) => {
-    alert(
+    toast.success(
       `Event postponed successfully! ${result.emailsSent} attendees notified.`
     );
     fetchMyEvents(); // Refresh events
   };
 
   const handleCancelSuccess = (result) => {
-    alert(
+    toast.success(
       `Event cancelled successfully! ${result.emailsSent} attendees notified.`
     );
     fetchMyEvents(); // Refresh events
@@ -88,7 +89,7 @@ export default function OrganizerDashboard() {
 
   const handleDelete = async (eventId, eventTitle, eventStatus) => {
     if (eventStatus !== 'cancelled') {
-      alert('Please cancel the event first before deleting it.');
+      toast.error('Please cancel the event first before deleting it.');
       return;
     }
 
@@ -114,14 +115,14 @@ export default function OrganizerDashboard() {
 
       if (response.ok) {
         setEvents(events.filter((e) => e.id !== eventId));
-        alert('Event deleted successfully');
+        toast.success('Event deleted successfully');
       } else {
         const data = await response.json();
-        alert(data.error || 'Failed to delete event');
+        toast.error(data.error || 'Failed to delete event');
       }
     } catch (error) {
       console.error('Error deleting event:', error);
-      alert('Failed to delete event');
+      toast.error('Failed to delete event');
     }
   };
 

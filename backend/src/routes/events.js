@@ -699,7 +699,7 @@ router.post(
         `UPDATE events
          SET start_date = $1,
              end_date = $2,
-             status = 'postponed',
+             status = 'active',
              postponed_from_start = $3,
              postponed_from_end = $4,
              "updatedAt" = CURRENT_TIMESTAMP
