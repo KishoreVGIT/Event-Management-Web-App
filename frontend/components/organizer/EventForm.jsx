@@ -116,9 +116,6 @@ export function EventForm({
           currentDay.setDate(startDay.getDate() + i);
 
           const dateStr = currentDay.toISOString().split('T')[0];
-          // Try to preserve existing slot for this date if it exists in previous state
-          // Ideally we would pass existing timeslots in defaultValues but dealing with that complexity might be overkill for this refactor
-          // but we should check if current timeSlots state has it.
           const existingSlot = timeSlots.find(s => s.date === dateStr);
 
           slots.push({
@@ -154,21 +151,6 @@ export function EventForm({
     };
     onSubmit(payload);
   };
-
-  // If defaultValues had timeSlots, we should initialize them (User might be editing)
-  // But standard form inputs are handled by useForm. timeSlots is custom state.
-  // The current refactor is pure extraction.
-  // In `edit/[id]/page.jsx`, it didn't seem to handle loading existing timeSlots into state in the code I viewed?
-  // Let me re-read `edit/[id]/page.jsx`.
-  // It fetches event, sets values for standard fields. It does NOT seem to set timeSlots state.
-  // So maybe timeSlots was a feature added in `new` but not fully implemented in `edit` or I missed it?
-  // `organizer/events/new/page.jsx` has the timeSlots logic.
-  // `organizer/events/edit/[id]/page.jsx` DOES NOT have the timeSlots logic in the code I read (lines 1-470).
-  // It only has standard fields.
-  // So I should include timeSlots logic in `EventForm` but it will only be active if `useTimeSlots` is toggled.
-  // Since `edit` page doesn't seem to support editing time slots yet (based on code), this refactor actually adds the *capability* (UI-wise) to edit page if we use the same form, but we need to be careful.
-  // If the backend helps, it's fine.
-  // For now I'll include the logic as it was in `new` page.
 
   return (
     <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-7">
