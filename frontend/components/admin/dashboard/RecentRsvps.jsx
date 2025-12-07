@@ -21,30 +21,29 @@ export function RecentRsvps({ recentRsvps }) {
 
   return (
     <div className="mt-6">
-      <Card className={'pt-6'}>
+      <Card className="bg-slate-950/70 border-slate-800/70 backdrop-blur-xl pt-6">
         <CardHeader>
-          <CardTitle>Recent RSVPs</CardTitle>
-          <CardDescription>Latest 10 event registrations</CardDescription>
+          <CardTitle className="text-slate-50">Recent RSVPs</CardTitle>
+          <CardDescription className="text-slate-400">Latest 10 event registrations</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-2">
             {recentRsvps.map((rsvp) => (
               <div
                 key={rsvp.id}
-                className="flex justify-between items-center p-3 bg-gray-50 dark:bg-gray-800 rounded">
+                className="flex justify-between items-center p-3 bg-slate-900/50 border border-slate-800 rounded-lg hover:bg-slate-800/30 transition-colors">
                 <div>
-                  <span className="font-medium text-gray-900 dark:text-white">
+                  <span className="font-medium text-slate-200">
                     {rsvp.userName}
                   </span>
-                  <span className="text-gray-600 dark:text-gray-400">
-                    {' '}
-                    registered for{' '}
+                  <span className="text-slate-500 mx-1">
+                    registered for
                   </span>
-                  <span className="font-medium text-gray-900 dark:text-white">
+                  <span className="font-medium text-blue-400">
                     {rsvp.eventTitle}
                   </span>
                 </div>
-                <div className="text-xs text-gray-500 dark:text-gray-400">
+                <div className="text-xs text-slate-500 ml-4">
                   {formatDate(rsvp.rsvpDate)}
                 </div>
               </div>

@@ -19,38 +19,38 @@ export function EventsTable({
   handleDeleteEvent,
 }) {
   return (
-    <Card>
+    <Card className="bg-slate-950/70 border-slate-800/70 backdrop-blur-xl">
       <CardHeader>
-        <div className="flex justify-between items-center">
-          <CardTitle>All Events ({events.length})</CardTitle>
-          <div className="relative w-64">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+        <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+          <CardTitle className="text-slate-50">All Events <span className="text-slate-500 text-lg ml-2">{events.length}</span></CardTitle>
+          <div className="relative w-full md:w-64">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
             <Input
               type="text"
               placeholder="Search events..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
+              className="pl-10 bg-slate-900/50 border-slate-800 text-slate-200 placeholder:text-slate-500 focus:ring-blue-900/50 focus:border-blue-700"
             />
           </div>
         </div>
       </CardHeader>
       <CardContent>
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b">
-                <th className="text-left p-3">Title</th>
-                <th className="text-left p-3">Organizer</th>
-                <th className="text-left p-3">Category</th>
-                <th className="text-left p-3">Date</th>
-                <th className="text-left p-3">Status</th>
-                <th className="text-left p-3">Attendees</th>
-                <th className="text-left p-3">Created</th>
-                <th className="text-left p-3">Actions</th>
+        <div className="rounded-md border border-slate-800">
+          <table className="w-full text-sm text-left">
+            <thead className="bg-slate-900/50 text-slate-400 font-medium">
+              <tr>
+                <th className="p-4">Title</th>
+                <th className="p-4">Organizer</th>
+                <th className="p-4">Category</th>
+                <th className="p-4">Date</th>
+                <th className="p-4">Status</th>
+                <th className="p-4 text-center">Attendees</th>
+                <th className="p-4">Created</th>
+                <th className="p-4 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="divide-y divide-slate-800">
               {events.map((event) => {
                 const status = getEventStatus(
                   event.startDate,
@@ -59,51 +59,57 @@ export function EventsTable({
                 return (
                   <tr
                     key={event.id}
-                    className="border-b hover:bg-gray-50 dark:hover:bg-gray-800">
-                    <td className="p-3 font-medium">{event.title}</td>
-                    <td className="p-3">
+                    className="hover:bg-slate-900/50 transition-colors">
+                    <td className="p-4 font-medium text-slate-200">{event.title}</td>
+                    <td className="p-4">
                       <div>
-                        <div>{event.organizer.name}</div>
-                        <div className="text-xs text-gray-500">
+                        <div className="text-slate-200">{event.organizer.name}</div>
+                        <div className="text-xs text-slate-500">
                           {event.organizer.email}
                         </div>
                       </div>
                     </td>
-                    <td className="p-3">
+                    <td className="p-4">
                       {event.category ? (
-                        <Badge variant="secondary">{event.category}</Badge>
+                        <Badge variant="outline" className="bg-slate-800/50 text-slate-300 border-slate-700">{event.category}</Badge>
                       ) : (
-                        <span className="text-gray-400 text-sm">None</span>
+                        <span className="text-slate-600 text-sm">None</span>
                       )}
                     </td>
-                    <td className="p-3">
+                    <td className="p-4 text-slate-400">
                       {formatDate(event.startDate)}
                     </td>
-                    <td className="p-3">
-                      <Badge className={`${status.color} text-white`}>
+                    <td className="p-4">
+                      <Badge className={`${
+                        status.label === 'Upcoming' ? 'bg-blue-500/10 text-blue-300 border-blue-500/20' : 
+                        status.label === 'Ongoing' ? 'bg-emerald-500/10 text-emerald-300 border-emerald-500/20' : 
+                        'bg-slate-500/10 text-slate-400 border-slate-500/20'
+                      } border`} variant="outline">
                         {status.label}
                       </Badge>
                     </td>
-                    <td className="p-3">
+                    <td className="p-4 text-center text-slate-400">
                       {event.attendeeCount}
-                      {event.capacity && ` / ${event.capacity}`}
+                      {event.capacity && <span className="text-slate-600"> / {event.capacity}</span>}
                     </td>
-                    <td className="p-3">
+                    <td className="p-4 text-slate-500">
                       {formatDate(event.createdAt)}
                     </td>
-                    <td className="p-3">
-                      <div className="flex gap-2">
+                    <td className="p-4 text-right">
+                      <div className="flex justify-end gap-2">
                         <Link href={`/events/${event.id}`}>
                           <Button
-                            variant="outline"
+                            variant="ghost"
                             size="sm"
+                            className="text-slate-400 hover:text-white hover:bg-slate-800"
                             title="View Event">
                             <Eye className="w-4 h-4" />
                           </Button>
                         </Link>
                         <Button
-                          variant="destructive"
+                          variant="ghost"
                           size="sm"
+                          className="text-red-400 hover:text-red-300 hover:bg-red-950/30"
                           onClick={() =>
                             handleDeleteEvent(event.id, event.title)
                           }

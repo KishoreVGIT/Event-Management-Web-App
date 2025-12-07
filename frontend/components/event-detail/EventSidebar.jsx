@@ -134,7 +134,8 @@ export function EventSidebar({
                 variant="outline"
                 onClick={onCancelRsvp}
                 disabled={rsvpLoading}
-                className="w-full h-11 rounded-full border-red-500/40 text-red-400 hover:bg-red-500/10 hover:text-red-300">
+                data-testid="cancel-rsvp-button"
+                className="w-full h-11 rounded-full border-red-500/40 bg-red-500 hover:bg-red-500/10 text-white hover:text-red-300">
                 {rsvpLoading ? 'Cancelling…' : 'Cancel RSVP'}
               </Button>
             ) : capacity && attendeeCount >= capacity ? (
@@ -147,6 +148,7 @@ export function EventSidebar({
               <Button
                 onClick={onRsvp}
                 disabled={rsvpLoading}
+                data-testid="rsvp-button"
                 className="w-full h-11 rounded-full bg-blue-600 hover:bg-blue-500">
                 {rsvpLoading ? 'RSVPing…' : 'RSVP to event'}
               </Button>
@@ -168,9 +170,11 @@ export function EventSidebar({
             </div>
           )}
 
-          <div className="pt-1">
-            <AddToCalendar event={event} />
-          </div>
+          {user && (
+            <div className="pt-1">
+              <AddToCalendar event={event} />
+            </div>
+          )}
         </CardContent>
       </Card>
     </aside>

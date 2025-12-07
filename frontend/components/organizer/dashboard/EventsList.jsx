@@ -1,12 +1,9 @@
 import Link from 'next/link';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Badge } from '@/components/ui/badge';
+import { Edit2, MoreVertical, Users } from 'lucide-react';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
 export function EventsList({
   events,
@@ -141,6 +138,7 @@ export function EventsList({
                       <Button
                         variant="ghost"
                         size="icon"
+                        data-testid="edit-event-button"
                         className="h-8 w-8 text-slate-400 hover:text-slate-100 hover:bg-slate-800 rounded-full">
                         <Edit2 className="w-4 h-4" />
                       </Button>
@@ -150,6 +148,7 @@ export function EventsList({
                         <Button
                           variant="ghost"
                           size="icon"
+                          data-testid="event-actions-menu"
                           className="h-8 w-8 text-slate-400 hover:text-slate-100 hover:bg-slate-800 rounded-full">
                           <MoreVertical className="w-4 h-4" />
                         </Button>
@@ -166,11 +165,13 @@ export function EventsList({
                               onClick={() => {
                                 if (onPostpone) onPostpone(event);
                               }}
+                              data-testid="postpone-event-button"
                               className="focus:bg-slate-900 focus:text-slate-100 cursor-pointer">
                               Postpone Event
                             </DropdownMenuItem>
                             <DropdownMenuItem
                               className="text-red-400 focus:text-red-300 focus:bg-red-500/10 cursor-pointer"
+                              data-testid="cancel-event-button"
                               onClick={() => {
                                 if (onCancel) onCancel(event);
                               }}>
@@ -180,7 +181,8 @@ export function EventsList({
                         )}
                         <DropdownMenuItem
                           className="text-red-400 focus:text-red-300 focus:bg-red-500/10 cursor-pointer"
-                          onClick={() => onDelete(event.id)}>
+                          data-testid="delete-event-button"
+                          onClick={() => onDelete(event.id, event.title, event.status)}>
                           Delete Event
                         </DropdownMenuItem>
                       </DropdownMenuContent>

@@ -122,7 +122,7 @@ router.delete('/users/:id', authenticate, requireAdmin, async (req, res) => {
     const { id } = req.params;
 
     // Prevent admin from deleting themselves
-    if (id === req.user.id || id === req.user.userId) {
+    if (parseInt(id) === req.user.id || parseInt(id) === req.user.userId) {
       return res.status(400).json({ error: 'Cannot delete your own account' });
     }
 

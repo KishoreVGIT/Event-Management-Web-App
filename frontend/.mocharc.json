@@ -1,0 +1,7 @@
+{
+  "extension": ["js", "jsx"],
+  "spec": "lib/**/*.test.js",
+  "require": ["test/setup.js"],
+  "timeout": 5000,
+  "exit": true
+}

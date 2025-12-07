@@ -10,6 +10,17 @@ import { API_URL } from '@/lib/constants';
 import { DashboardHeader } from '@/components/organizer/dashboard/DashboardHeader';
 import { EmptyState } from '@/components/organizer/dashboard/EmptyState';
 import { EventsList } from '@/components/organizer/dashboard/EventsList';
+import { toast } from 'sonner';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 export default function OrganizerDashboard() {
   const router = useRouter();
@@ -20,13 +31,15 @@ export default function OrganizerDashboard() {
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
   const [attendeesModalOpen, setAttendeesModalOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [eventToDelete, setEventToDelete] = useState(null);
 
   useEffect(() => {
     if (!authLoading) {
       if (!user) {
         router.push('/signin');
       } else if (user.role !== 'organizer' && user.role !== 'admin') {
-        alert('You must be an organizer to access this page');
+        toast.error('You must be an organizer to access this page');
         router.push('/events');
       } else {
         fetchMyEvents();
@@ -68,14 +81,14 @@ export default function OrganizerDashboard() {
   };
 
   const handlePostponeSuccess = (result) => {
-    alert(
+    toast.success(
       `Event postponed successfully! ${result.emailsSent} attendees notified.`
     );
     fetchMyEvents(); // Refresh events
   };
 
   const handleCancelSuccess = (result) => {
-    alert(
+    toast.success(
       `Event cancelled successfully! ${result.emailsSent} attendees notified.`
     );
     fetchMyEvents(); // Refresh events
@@ -86,24 +99,22 @@ export default function OrganizerDashboard() {
     setAttendeesModalOpen(true);
   };
 
-  const handleDelete = async (eventId, eventTitle, eventStatus) => {
+  const handleDelete = (eventId, eventTitle, eventStatus) => {
     if (eventStatus !== 'cancelled') {
-      alert('Please cancel the event first before deleting it.');
+      toast.error('Please cancel the event first before deleting it.');
       return;
     }
+    setEventToDelete({ id: eventId, title: eventTitle });
+    setDeleteDialogOpen(true);
+  };
 
-    if (
-      !confirm(
-        `Are you sure you want to permanently delete "${eventTitle}"? This action cannot be undone.`
-      )
-    ) {
-      return;
-    }
+  const confirmDelete = async () => {
+    if (!eventToDelete) return;
 
     try {
       const token = getToken();
       const response = await fetch(
-        `${API_URL}/api/events/${eventId}`,
+        `${API_URL}/api/events/${eventToDelete.id}`,
         {
           method: 'DELETE',
           headers: {
@@ -113,15 +124,18 @@ export default function OrganizerDashboard() {
       );
 
       if (response.ok) {
-        setEvents(events.filter((e) => e.id !== eventId));
-        alert('Event deleted successfully');
+        setEvents(events.filter((e) => e.id !== eventToDelete.id));
+        toast.success('Event deleted successfully');
       } else {
         const data = await response.json();
-        alert(data.error || 'Failed to delete event');
+        toast.error(data.error || 'Failed to delete event');
       }
     } catch (error) {
       console.error('Error deleting event:', error);
-      alert('Failed to delete event');
+      toast.error('Failed to delete event');
+    } finally {
+      setDeleteDialogOpen(false);
+      setEventToDelete(null);
     }
   };
 
@@ -183,6 +197,29 @@ export default function OrganizerDashboard() {
             getToken={getToken}
           />
         )}
+
+        {/* Delete Confirmation Dialog */}
+        <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+          <AlertDialogContent className="bg-slate-950 border-slate-800 text-slate-50">
+            <AlertDialogHeader>
+              <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+              <AlertDialogDescription className="text-slate-400">
+                This action cannot be undone. This will permanently delete the event
+                &quot;{eventToDelete?.title}&quot; and remove all associated data.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel className="border-slate-800 bg-slate-900/50 text-slate-300 hover:bg-slate-800 hover:text-white">
+                Cancel
+              </AlertDialogCancel>
+              <AlertDialogAction
+                className="bg-red-600 hover:bg-red-700 text-white border-none"
+                onClick={confirmDelete}>
+                Delete Event
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </main>
     </div>
   );

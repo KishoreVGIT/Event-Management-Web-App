@@ -12,6 +12,7 @@ import { EventsByCategory } from '@/components/admin/dashboard/EventsByCategory'
 import { RecentUsers } from '@/components/admin/dashboard/RecentUsers';
 import { UpcomingEvents } from '@/components/admin/dashboard/UpcomingEvents';
 import { RecentRsvps } from '@/components/admin/dashboard/RecentRsvps';
+import { AdminHeader } from '@/components/admin/AdminHeader';
 
 export default function AdminDashboardPage() {
   const router = useRouter();
@@ -63,31 +64,36 @@ export default function AdminDashboardPage() {
 
   if (authLoading || loading) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
-        <p className="text-gray-600 dark:text-gray-400">
-          Loading dashboard...
-        </p>
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-14 h-14 rounded-full border-4 border-slate-800 border-t-blue-500 animate-spin" />
+          <p className="text-slate-400">Loading dashboard...</p>
+        </div>
       </div>
     );
   }
 
   if (!stats) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
-        <p className="text-gray-600 dark:text-gray-400">Failed to load stats</p>
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
+        <p className="text-red-400">Failed to load stats</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 lg:px-0 py-8">
+    <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-950 to-slate-900">
+      <AdminHeader title="Dashboard" />
+      
+      <div className="fixed inset-0 bg-[linear-gradient(to_right,#1e293b_1px,transparent_1px),linear-gradient(to_bottom,#1e293b_1px,transparent_1px)] bg-[size:4rem_4rem] opacity-5 pointer-events-none" />
+
+      <main className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 md:px-8 lg:px-0 py-8">
         <div className="mb-8">
-          <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-            Admin Dashboard
+          <h2 className="text-3xl font-bold text-white mb-2">
+            Dashboard Overview
           </h2>
-          <p className="text-gray-600 dark:text-gray-400">
-            System statistics and overview
+          <p className="text-slate-400">
+            Monitor system performance and user activity
           </p>
         </div>
 

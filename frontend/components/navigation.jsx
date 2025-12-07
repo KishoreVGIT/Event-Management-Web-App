@@ -102,12 +102,13 @@ export function Navigation() {
           <div className="hidden lg:flex items-center space-x-3">
             {user ? (
               <>
-                <span className="text-sm text-slate-300 px-4 py-2 bg-slate-900/70 border border-slate-800/70 rounded-full backdrop-blur-sm">
+                <span className="text-sm text-slate-300 px-4 py-2 bg-slate-900/70 border border-slate-800/70 rounded-full backdrop-blur-sm" data-testid="user-name-display">
                   {user.name}
                 </span>
                 <Button
                   size="sm"
                   onClick={handleSignOut}
+                  data-testid="sign-out-button"
                   className="rounded-full hover:bg-red-700 text-white hover:border-red-500/60 transition-all bg-red-800 px-4">
                   Sign Out
                   <LogOut />
@@ -179,6 +180,7 @@ export function Navigation() {
                   </div>
                   <Button
                     variant="outline"
+                    data-testid="sign-out-button-mobile"
                     className="w-full justify-center rounded-full border-red-500/40 bg-red-500 hover:bg-red-500/10 hover:text-red-300 hover:border-red-500/60 text-white"
                     onClick={handleSignOut}>
                     Sign Out
