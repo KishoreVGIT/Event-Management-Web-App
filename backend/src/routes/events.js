@@ -8,6 +8,7 @@ import {
   sendEventUpdateEmail,
   sendEventCancellationEmail,
 } from '../services/email.js';
+import { validateEventDates, validateCapacity } from '../utils/validation.js';
 
 const router = express.Router();
 
@@ -293,25 +294,16 @@ router.post('/', authenticate, requireOrganizer, async (req, res) => {
       return res.status(400).json({ error: 'Title is required' });
     }
 
-    // Validate that end date is after start date
-    if (startDate && endDate) {
-      const start = new Date(startDate);
-      const end = new Date(endDate);
-      if (end <= start) {
-        return res.status(400).json({
-          error: 'End date/time must be after start date/time'
-        });
-      }
+    // Validate dates
+    const dateError = validateEventDates(startDate, endDate);
+    if (dateError) {
+      return res.status(400).json({ error: dateError });
     }
 
-    // Validate capacity if provided
-    if (capacity !== null && capacity !== undefined) {
-      const capacityNum = parseInt(capacity);
-      if (isNaN(capacityNum) || capacityNum < 1) {
-        return res
-          .status(400)
-          .json({ error: 'Capacity must be a positive number' });
-      }
+    // Validate capacity
+    const capacityError = validateCapacity(capacity);
+    if (capacityError) {
+      return res.status(400).json({ error: capacityError });
     }
 
     const result = await query(
@@ -406,25 +398,16 @@ router.put(
           .json({ error: 'You can only edit your own events' });
       }
 
-      // Validate that end date is after start date
-      if (startDate && endDate) {
-        const start = new Date(startDate);
-        const end = new Date(endDate);
-        if (end <= start) {
-          return res.status(400).json({
-            error: 'End date/time must be after start date/time'
-          });
-        }
+      // Validate dates
+      const dateError = validateEventDates(startDate, endDate);
+      if (dateError) {
+        return res.status(400).json({ error: dateError });
       }
 
-      // Validate capacity if provided
-      if (capacity !== null && capacity !== undefined) {
-        const capacityNum = parseInt(capacity);
-        if (isNaN(capacityNum) || capacityNum < 1) {
-          return res
-            .status(400)
-            .json({ error: 'Capacity must be a positive number' });
-        }
+      // Validate capacity
+      const capacityError = validateCapacity(capacity);
+      if (capacityError) {
+        return res.status(400).json({ error: capacityError });
       }
 
       const result = await query(
