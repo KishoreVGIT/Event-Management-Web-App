@@ -177,7 +177,7 @@ export function EventsList({
                         )}
                         <DropdownMenuItem
                           className="text-red-400 focus:text-red-300 focus:bg-red-500/10 cursor-pointer"
-                          onClick={() => onDelete(event.id)}>
+                          onClick={() => onDelete(event.id, event.title, event.status)}>
                           Delete Event
                         </DropdownMenuItem>
                       </DropdownMenuContent>
