@@ -3,6 +3,7 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { query } from '../db.js';
 import { authLimiter } from '../middleware/rate-limit.js';
+import { sendWelcomeEmail } from '../services/email.js';
 
 const router = express.Router();
 
@@ -50,6 +51,11 @@ router.post('/signup', authLimiter, async (req, res) => {
       JWT_SECRET,
       { expiresIn: '7d' }
     );
+
+    // Send welcome email (non-blocking)
+    sendWelcomeEmail(user).catch(err => {
+      console.error('Failed to send welcome email:', err);
+    });
 
     res.status(201).json({
       message: 'User created successfully',

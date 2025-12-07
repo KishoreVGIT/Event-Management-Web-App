@@ -37,8 +37,7 @@ const signUpSchema = yup.object({
     .oneOf(['student', 'organizer'], 'Invalid role')
     .required('Please select a role'),
   organizationName: yup
-    .string()
-    .min(2, 'Organization name must be at least 2 characters'),
+    .string().optional(),
 });
 
 export function SignUpForm() {
