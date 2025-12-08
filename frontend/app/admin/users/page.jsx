@@ -7,6 +7,25 @@ import { API_URL } from '@/lib/constants';
 import { AdminHeader } from '@/components/admin/AdminHeader';
 import { UsersTable } from '@/components/admin/UsersTable';
 
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogDescription,
+} from '@/components/ui/dialog';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
+import { toast } from 'sonner';
+
 export default function AdminUsersPage() {
   const router = useRouter();
   const { user, getToken, loading: authLoading } = useAuth();
@@ -14,32 +33,23 @@ export default function AdminUsersPage() {
   const [filteredUsers, setFilteredUsers] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
+  const [isRoleDialogOpen, setIsRoleDialogOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [newRole, setNewRole] = useState('student');
+  const [updating, setUpdating] = useState(false);
 
   useEffect(() => {
     if (!authLoading) {
       if (!user) {
         router.push('/signin');
       } else if (user.role !== 'admin') {
-        alert('Admin access required');
+        toast.error('Admin access required');
         router.push('/');
       } else {
         fetchUsers();
       }
     }
   }, [user, authLoading]);
-
-  useEffect(() => {
-    if (searchTerm) {
-      const filtered = users.filter(
-        (u) =>
-          u.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          u.email.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-      setFilteredUsers(filtered);
-    } else {
-      setFilteredUsers(users);
-    }
-  }, [searchTerm, users]);
 
   const fetchUsers = async () => {
     try {
@@ -54,9 +64,12 @@ export default function AdminUsersPage() {
         const data = await response.json();
         setUsers(data);
         setFilteredUsers(data);
+      } else {
+        toast.error('Failed to fetch users');
       }
     } catch (error) {
       console.error('Error fetching users:', error);
+      toast.error('Failed to fetch users');
     } finally {
       setLoading(false);
     }
@@ -85,34 +98,37 @@ export default function AdminUsersPage() {
 
       if (response.ok) {
         setUsers(users.filter((u) => u.id !== userId));
-        alert('User deleted successfully');
+        toast.success('User deleted successfully');
       } else {
         const data = await response.json();
-        alert(data.error || 'Failed to delete user');
+        toast.error(data.error || 'Failed to delete user');
       }
     } catch (error) {
       console.error('Error deleting user:', error);
-      alert('Failed to delete user');
+      toast.error('Failed to delete user');
     }
   };
 
-  const handleChangeRole = async (userId, currentRole) => {
-    const newRole = prompt(
-      `Change role for user (current: ${currentRole})\nEnter: student, organizer, or admin`,
-      currentRole
-    );
+  const openRoleDialog = (userId, currentRole) => {
+    const user = users.find((u) => u.id === userId);
+    if (!user) return;
+    setSelectedUser(user);
+    setNewRole(currentRole);
+    setIsRoleDialogOpen(true);
+  };
 
-    if (!newRole || newRole === currentRole) return;
-
-    if (!['student', 'organizer', 'admin'].includes(newRole)) {
-      alert('Invalid role');
+  const handleSaveRole = async () => {
+    if (!selectedUser) return;
+    if (newRole === selectedUser.role) {
+      setIsRoleDialogOpen(false);
       return;
     }
 
+    setUpdating(true);
     try {
       const token = getToken();
       const response = await fetch(
-        `${API_URL}/api/admin/users/${userId}/role`,
+        `${API_URL}/api/admin/users/${selectedUser.id}/role`,
         {
           method: 'PUT',
           headers: {
@@ -125,14 +141,17 @@ export default function AdminUsersPage() {
 
       if (response.ok) {
         fetchUsers();
-        alert('Role updated successfully');
+        setIsRoleDialogOpen(false);
+        toast.success('Role updated successfully');
       } else {
         const data = await response.json();
-        alert(data.error || 'Failed to update role');
+        toast.error(data.error || 'Failed to update role');
       }
     } catch (error) {
       console.error('Error updating role:', error);
-      alert('Failed to update role');
+      toast.error('Failed to update role');
+    } finally {
+      setUpdating(false);
     }
   };
 
@@ -176,9 +195,49 @@ export default function AdminUsersPage() {
           searchTerm={searchTerm}
           setSearchTerm={setSearchTerm}
           formatDate={formatDate}
-          handleChangeRole={handleChangeRole}
+          handleChangeRole={openRoleDialog}
           handleDeleteUser={handleDeleteUser}
         />
+
+        <Dialog open={isRoleDialogOpen} onOpenChange={setIsRoleDialogOpen}>
+          <DialogContent className="bg-slate-950 border-slate-800 text-slate-100 sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Change User Role</DialogTitle>
+              <DialogDescription className="text-slate-400">
+                Update the role for <span className="text-slate-200 font-semibold">{selectedUser?.name}</span>.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="role" className="text-right text-slate-300">
+                  Role
+                </Label>
+                <Select value={newRole} onValueChange={setNewRole}>
+                  <SelectTrigger className="col-span-3 bg-slate-900 border-slate-700 text-slate-100">
+                    <SelectValue placeholder="Select a role" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-slate-900 border-slate-700 text-slate-100">
+                    <SelectItem value="student">Student</SelectItem>
+                    <SelectItem value="organizer">Organizer</SelectItem>
+                    <SelectItem value="admin">Admin</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button 
+                variant="outline" 
+                onClick={() => setIsRoleDialogOpen(false)}
+                className="text-black"
+              >
+                Cancel
+              </Button>
+              <Button onClick={handleSaveRole} disabled={updating} className="bg-blue-600 hover:bg-blue-500 text-white">
+                {updating ? 'Saving...' : 'Save Changes'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </main>
     </div>
   );

@@ -1,5 +1,4 @@
 -- Migration: Add status column to events table
--- Run this in Neon SQL Editor after the initial schema
 
 -- Create enum type for event status
 CREATE TYPE event_status AS ENUM ('active', 'cancelled', 'postponed');

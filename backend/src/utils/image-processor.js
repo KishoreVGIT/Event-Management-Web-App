@@ -1,12 +1,6 @@
 import cloudinary from '../config/cloudinary.js';
 import { Readable } from 'stream';
 
-/**
- * Upload image to Cloudinary from buffer
- * @param {Buffer} buffer - Image buffer
- * @param {Object} options - Upload options
- * @returns {Promise<Object>} - Cloudinary upload result
- */
 export async function uploadToCloudinary(buffer, options = {}) {
   return new Promise((resolve, reject) => {
     const uploadStream = cloudinary.uploader.upload_stream(
@@ -28,17 +22,12 @@ export async function uploadToCloudinary(buffer, options = {}) {
       }
     );
 
-    // Convert buffer to stream and pipe to Cloudinary
+
     const readableStream = Readable.from(buffer);
     readableStream.pipe(uploadStream);
   });
 }
 
-/**
- * Delete image from Cloudinary
- * @param {string} publicId - Cloudinary public ID
- * @returns {Promise<Object>} - Deletion result
- */
 export async function deleteFromCloudinary(publicId) {
   try {
     const result = await cloudinary.uploader.destroy(publicId);
@@ -49,17 +38,10 @@ export async function deleteFromCloudinary(publicId) {
   }
 }
 
-/**
- * Extract Cloudinary public ID from URL
- * @param {string} imageUrl - Cloudinary image URL
- * @returns {string|null} - Public ID or null
- */
 export function extractPublicId(imageUrl) {
   if (!imageUrl) return null;
 
   try {
-    // Extract public ID from Cloudinary URL
-    // Format: https://res.cloudinary.com/{cloud_name}/image/upload/{transformations}/{public_id}.{extension}
     const regex = /\/campus-connect\/events\/[^.]+/;
     const match = imageUrl.match(regex);
     return match ? match[0].substring(1) : null; // Remove leading slash

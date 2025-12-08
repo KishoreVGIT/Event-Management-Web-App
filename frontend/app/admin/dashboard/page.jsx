@@ -22,7 +22,7 @@ export default function AdminDashboardPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (authLoading) return; // wait for auth to initialize
+    if (authLoading) return;
 
     if (!user) {
       router.push('/signin');

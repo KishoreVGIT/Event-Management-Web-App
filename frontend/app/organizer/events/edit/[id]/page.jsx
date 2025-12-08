@@ -86,8 +86,6 @@ export default function EditEventPage() {
         imageUrl: data.imageUrl || '',
         startDate: data.startDate ? new Date(data.startDate).toISOString() : '',
         endDate: data.endDate ? new Date(data.endDate).toISOString() : '',
-        // Note: passing timeSlots if they exist would be needed if we support editing them
-        // For now, EventForm handles generating them if enabled in UI
       };
 
       setInitialData(formattedData);

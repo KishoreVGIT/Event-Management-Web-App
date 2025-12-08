@@ -15,7 +15,7 @@ export function RsvpCard({ rsvp, onCancel, formatDate, getStatus }) {
   const eventStatus = getStatus(event.startDate, event.endDate);
 
   return (
-    <Card className="group hover:shadow-2xl hover:shadow-blue-900/20 transition-all duration-300 bg-slate-950/70 border-slate-800/70 backdrop-blur-xl">
+    <Card className="group hover:shadow-2xl hover:shadow-blue-900/20 transition-all duration-300 bg-slate-950/70 border-slate-800/70 backdrop-blur-xl pt-6">
       <CardHeader className="border-b border-slate-800/70 pb-4">
         <div className="flex justify-between items-start mb-2 gap-4">
           <CardTitle className="text-lg font-semibold text-slate-50 line-clamp-1 group-hover:text-blue-400 transition-colors">
@@ -69,16 +69,15 @@ export function RsvpCard({ rsvp, onCancel, formatDate, getStatus }) {
 
         <div className="flex gap-2 pt-2 border-t border-slate-800/50 mt-4">
           <Link href={`/events/${event.id}`} className="flex-1">
-            <Button variant="outline" className="w-full border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white hover:border-slate-600 h-9 rounded-lg text-xs font-medium">
+            <Button className="w-full">
               View Details
             </Button>
           </Link>
           {eventStatus.status !== 'past' && (
             <Button
               variant="destructive"
-              size="sm"
               onClick={() => onCancel(event.id)}
-              className="bg-red-500/10 text-red-400 hover:bg-red-500/20 border border-red-500/20 h-9 rounded-lg text-xs font-medium">
+              >
               Cancel RSVP
             </Button>
           )}

@@ -141,7 +141,7 @@ router.delete('/users/:id', authenticate, requireAdmin, async (req, res) => {
   }
 });
 
-// Get all events (admin only - for moderation)
+// Get all events (admin only)
 router.get('/events', authenticate, requireAdmin, async (req, res) => {
   try {
     const result = await query(`
@@ -240,7 +240,7 @@ router.get('/stats', authenticate, requireAdmin, async (req, res) => {
       ORDER BY count DESC
     `);
 
-    // Recent users (note "createdAt" camelCased)
+    // Recent users
     const recentUsersResult = await query(`
       SELECT id, name, email, role, "createdAt"
       FROM users

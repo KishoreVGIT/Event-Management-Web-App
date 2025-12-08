@@ -7,6 +7,18 @@ import { API_URL } from '@/lib/constants';
 import { AdminHeader } from '@/components/admin/AdminHeader';
 import { EventsTable } from '@/components/admin/EventsTable';
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { toast } from 'sonner';
+
 export default function AdminEventsPage() {
   const router = useRouter();
   const { user, getToken, loading: authLoading } = useAuth();
@@ -14,32 +26,23 @@ export default function AdminEventsPage() {
   const [filteredEvents, setFilteredEvents] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
+  const [deleteEventId, setDeleteEventId] = useState(null);
+  const [deleteEventTitle, setDeleteEventTitle] = useState('');
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     if (!authLoading) {
       if (!user) {
         router.push('/signin');
       } else if (user.role !== 'admin') {
-        alert('Admin access required');
+        toast.error('Admin access required');
         router.push('/');
       } else {
         fetchEvents();
       }
     }
   }, [user, authLoading]);
-
-  useEffect(() => {
-    if (searchTerm) {
-      const filtered = events.filter(
-        (e) =>
-          e.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          e.organizer.name.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-      setFilteredEvents(filtered);
-    } else {
-      setFilteredEvents(events);
-    }
-  }, [searchTerm, events]);
 
   const fetchEvents = async () => {
     try {
@@ -54,27 +57,31 @@ export default function AdminEventsPage() {
         const data = await response.json();
         setEvents(data);
         setFilteredEvents(data);
+      } else {
+        toast.error('Failed to fetch events');
       }
     } catch (error) {
       console.error('Error fetching events:', error);
+      toast.error('Failed to fetch events');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleDeleteEvent = async (eventId, eventTitle) => {
-    if (
-      !confirm(
-        `Are you sure you want to delete "${eventTitle}"? This action cannot be undone and will remove all associated RSVPs.`
-      )
-    ) {
-      return;
-    }
+  const confirmDeleteEvent = (eventId, eventTitle) => {
+    setDeleteEventId(eventId);
+    setDeleteEventTitle(eventTitle || 'this event');
+    setIsDeleteDialogOpen(true);
+  };
 
+  const handleDeleteEvent = async () => {
+    if (!deleteEventId) return;
+    
+    setDeleting(true);
     try {
       const token = getToken();
       const response = await fetch(
-        `${API_URL}/api/admin/events/${eventId}`,
+        `${API_URL}/api/admin/events/${deleteEventId}`,
         {
           method: 'DELETE',
           headers: {
@@ -84,15 +91,19 @@ export default function AdminEventsPage() {
       );
 
       if (response.ok) {
-        setEvents(events.filter((e) => e.id !== eventId));
-        alert('Event deleted successfully');
+        setEvents(events.filter((e) => e.id !== deleteEventId));
+        toast.success('Event deleted successfully');
+        setIsDeleteDialogOpen(false);
       } else {
         const data = await response.json();
-        alert(data.error || 'Failed to delete event');
+        toast.error(data.error || 'Failed to delete event');
       }
     } catch (error) {
       console.error('Error deleting event:', error);
-      alert('Failed to delete event');
+      toast.error('Failed to delete event');
+    } finally {
+      setDeleting(false);
+      setDeleteEventId(null);
     }
   };
 
@@ -152,8 +163,36 @@ export default function AdminEventsPage() {
           setSearchTerm={setSearchTerm}
           formatDate={formatDate}
           getEventStatus={getEventStatus}
-          handleDeleteEvent={handleDeleteEvent}
+          handleDeleteEvent={confirmDeleteEvent}
         />
+
+        <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+          <AlertDialogContent className="bg-slate-950 border-slate-800 text-slate-100">
+            <AlertDialogHeader>
+              <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+              <AlertDialogDescription className="text-slate-400">
+                This action cannot be undone. This will permanently delete the event
+                <span className="font-semibold text-slate-200"> "{deleteEventTitle}" </span>
+                and remove all RSVPs.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel 
+                className="text-black"
+                onClick={() => setIsDeleteDialogOpen(false)}
+              >
+                Cancel
+              </AlertDialogCancel>
+              <AlertDialogAction 
+                onClick={handleDeleteEvent}
+                className="bg-red-600 hover:bg-red-700 text-white border-0"
+                disabled={deleting}
+              >
+                {deleting ? 'Deleting...' : 'Delete'}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </main>
     </div>
   );

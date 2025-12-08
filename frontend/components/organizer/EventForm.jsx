@@ -97,7 +97,7 @@ export function EventForm({
     return endDay > startDay;
   })();
 
-  // Generate time slots when dates change and feature is enabled
+  // time slots 
   useEffect(() => {
     if (useTimeSlots && startDate && endDate) {
       const start = new Date(startDate);
@@ -109,13 +109,16 @@ export function EventForm({
       const daysDiff = Math.ceil((endDay - startDay) / (1000 * 60 * 60 * 24));
 
       if (daysDiff > 0) {
-        // Generate slots for each day
+        // slots for each day
         const slots = [];
         for (let i = 0; i <= daysDiff; i++) {
           const currentDay = new Date(startDay);
           currentDay.setDate(startDay.getDate() + i);
 
-          const dateStr = currentDay.toISOString().split('T')[0];
+          const year = currentDay.getFullYear();
+          const month = String(currentDay.getMonth() + 1).padStart(2, '0');
+          const day = String(currentDay.getDate()).padStart(2, '0');
+          const dateStr = `${year}-${month}-${day}`;
           const existingSlot = timeSlots.find(s => s.date === dateStr);
 
           slots.push({
@@ -203,14 +206,15 @@ export function EventForm({
                 name="endDate"
                 control={control}
                 render={({ field: endField }) => (
-                  <DateTimeRangePicker
-                    startValue={startField.value}
-                    endValue={endField.value}
-                    onStartChange={startField.onChange}
-                    onEndChange={endField.onChange}
-                    startError={errors.startDate?.message}
-                    endError={errors.endDate?.message}
-                  />
+                    <DateTimeRangePicker
+                      startValue={startField.value}
+                      endValue={endField.value}
+                      onStartChange={startField.onChange}
+                      onEndChange={endField.onChange}
+                      startError={errors.startDate?.message}
+                      endError={errors.endDate?.message}
+                      timeDisabled={useTimeSlots}
+                    />
                 )}
               />
             )}
@@ -229,7 +233,7 @@ export function EventForm({
         )}
       </div>
 
-      {/* Time Slots for Multi-Day Events (Only if multi-day) */}
+      {/* Time Slots for Multi-Day Events */}
       {isMultiDay && (
         <div className="space-y-4 p-4 border border-slate-800 rounded-xl bg-slate-900/50">
           <div className="flex items-center justify-between">
@@ -262,7 +266,7 @@ export function EventForm({
                   <div>
                     <FieldLabel className="text-xs text-slate-400">Date</FieldLabel>
                     <div className="text-sm font-medium text-slate-200 mt-1">
-                      {new Date(slot.date).toLocaleDateString('en-US', {
+                      {new Date(`${slot.date}T00:00:00`).toLocaleDateString('en-US', {
                         weekday: 'short',
                         month: 'short',
                         day: 'numeric',

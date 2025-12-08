@@ -23,6 +23,7 @@ router.get('/', async (req, res) => {
       FROM events e
       JOIN users u ON e.user_id = u.id
       LEFT JOIN event_attendees ea ON e.id = ea.event_id
+      WHERE e.status != 'cancelled'
       GROUP BY e.id, u.id
       ORDER BY e.start_date ASC NULLS LAST
     `);
@@ -528,10 +529,7 @@ router.put(
   }
 );
 
-/**
- * POST /api/events/:id/cancel
- * Cancel an event - sends notification emails to all attendees
- */
+//Cancel an event 
 router.post(
   '/:id/cancel',
   authenticate,
@@ -627,10 +625,7 @@ router.post(
   }
 );
 
-/**
- * POST /api/events/:id/postpone
- * Postpone/reschedule an event - sends notification emails to all attendees
- */
+//Postpone/reschedule an event 
 router.post(
   '/:id/postpone',
   authenticate,

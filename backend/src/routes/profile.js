@@ -49,7 +49,6 @@ router.get('/me', authenticate, async (req, res) => {
 
   user.rsvps = rsvpResult.rows.map((row) => ({
     id: row.id,
-    // you don’t actually use rsvpDate on the frontend, so we can omit or set null
     rsvpDate: null,
     status: row.rsvp_status,
     event: {
@@ -103,7 +102,7 @@ router.get('/me', authenticate, async (req, res) => {
     capacity: row.capacity,
     imageUrl: row.image_url,
     status: row.status,
-    createdAt: row.createdAt, // from e."createdAt"
+    createdAt: row.createdAt,
     attendeeCount: Number(row.attendee_count) || 0,
   }));
 }
@@ -122,16 +121,13 @@ router.put('/me', authenticate, async (req, res) => {
     const userId = req.user.id;
     const { name, organizationName } = req.body;
 
-    // Validate input
     if (!name || name.trim().length < 2) {
       return res.status(400).json({ error: 'Name must be at least 2 characters' });
     }
 
-    // Build update query based on fields provided
     let updateQuery = 'UPDATE users SET name = $1';
     const params = [name.trim()];
 
-    // Add organization_name if provided
     if (organizationName !== undefined) {
       updateQuery += ', organization_name = $2';
       params.push(organizationName && organizationName.trim() ? organizationName.trim() : null);
@@ -140,7 +136,6 @@ router.put('/me', authenticate, async (req, res) => {
     updateQuery += ` WHERE id = $${params.length + 1} RETURNING id, email, name, role, organization_name, "createdAt"`;
     params.push(userId);
 
-    // Update user
     const result = await query(updateQuery, params);
 
     if (result.rows.length === 0) {

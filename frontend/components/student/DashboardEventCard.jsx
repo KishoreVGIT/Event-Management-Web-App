@@ -12,7 +12,7 @@ import { Calendar, MapPin, Users, Tag } from 'lucide-react';
 
 export function DashboardEventCard({ event, formatDate }) {
   return (
-    <Card className="group hover:shadow-2xl hover:shadow-blue-900/20 transition-all duration-300 bg-slate-950/70 border-slate-800/70 backdrop-blur-xl">
+    <Card className="group hover:shadow-2xl hover:shadow-blue-900/20 transition-all duration-300 bg-slate-950/70 border-slate-800/70 backdrop-blur-xl pt-6">
       <CardHeader className="border-b border-slate-800/70 pb-4">
         <CardTitle className="text-lg font-semibold text-slate-50 line-clamp-1 group-hover:text-blue-400 transition-colors">
           {event.title}

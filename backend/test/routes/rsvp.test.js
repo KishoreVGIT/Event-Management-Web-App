@@ -17,8 +17,6 @@ describe('RSVP Routes', () => {
        release: sinon.stub(),
      };
      
-     // Stub pool.connect to return our mock client
-     // This works because pool is an object instance, not a readonly export
      connectStub = sinon.stub(pool, 'connect').resolves(mockClient);
 
      // Create auth token
@@ -36,18 +34,6 @@ describe('RSVP Routes', () => {
 
   describe('POST /api/rsvp/:eventId', () => {
     it('should RSVP successfully', async () => {
-      // Sequence of queries expected in the user flow:
-      // 1. BEGIN
-      // 2. SELECT event (check exists)
-      // 3. SELECT existing RSVP (check duplicate)
-      // 4. SELECT count (check capacity) - optional if capacity set, let's assume capacity=100
-      // 5. INSERT RSVP
-      // 6. SELECT event details (for response)
-      // 7. COMMIT
-      // 8. SELECT user (for email)... Wait, the route does `await query(...)` for user info, NOT client.query
-      
-      // We also need to stub pool.query for the email user fetch part
-      // The code uses `query` helper which calls `pool.query`.
       sinon.stub(pool, 'query').resolves({ rows: [{ name: 'Student', email: 'student@example.com' }] });
 
       mockClient.query.withArgs('BEGIN').resolves();
@@ -72,7 +58,7 @@ describe('RSVP Routes', () => {
         rows: [{ id: 101, user_id: 1, event_id: 1, status: 'confirmed' }]
       });
 
-      // Fetch event details (catch-all for the big select, or match loosely)
+      // Fetch event details 
       mockClient.query.withArgs(sinon.match(/SELECT.*FROM events/s)).resolves({
         rows: [{ 
           id: 1, title: 'Test Event', start_date: new Date(), 
@@ -92,7 +78,7 @@ describe('RSVP Routes', () => {
     });
 
     it('should prevent duplicate RSVP', async () => {
-      sinon.stub(pool, 'query'); // Just in case
+      sinon.stub(pool, 'query');
       mockClient.query.withArgs('BEGIN').resolves();
       
       // Event check
@@ -100,7 +86,6 @@ describe('RSVP Routes', () => {
         rows: [{ id: 1, capacity: 100 }]
       });
 
-      // Existing RSVP check - Found One!
       mockClient.query.withArgs(sinon.match(/SELECT id FROM event_attendees/)).resolves({
         rows: [{ id: 50 }]
       });

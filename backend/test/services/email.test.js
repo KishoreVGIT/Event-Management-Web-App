@@ -6,12 +6,10 @@ describe('Email Service', () => {
   let sendMailStub;
 
   beforeEach(() => {
-    // Stub the sendMail method of the exported transporter object
     sendMailStub = sinon.stub(transporter, 'sendMail').resolves({ messageId: 'test-message-id' });
   });
 
   afterEach(() => {
-    // Restore the stub to ensures other tests aren't affected
     sendMailStub.restore();
   });
 
@@ -36,7 +34,6 @@ describe('Email Service', () => {
     });
 
     it('should handle errors gracefully', async () => {
-      // Force the stub to reject
       sendMailStub.rejects(new Error('SMTP Error'));
 
       const options = {

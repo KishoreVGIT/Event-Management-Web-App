@@ -23,7 +23,7 @@ describe('Event Management', () => {
     cy.get('#title').type(eventTitle);
     cy.get('#description').type('This is a test event created by Cypress.');
     
-    // Set time directly - date picker will auto-select today
+    // Set time directly
     cy.get('#start-time').clear().type('10:00');
     cy.get('#end-time').clear().type('12:00');
     

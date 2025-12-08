@@ -28,7 +28,7 @@ describe('Event Routes', () => {
 
   describe('POST /api/events', () => {
     it('should create an event successfully', async () => {
-      // Mock validation queries (user check)
+      // Mock validation queries
       queryStub.resolves({ 
         rows: [{ 
           id: 1, 
@@ -38,7 +38,6 @@ describe('Event Routes', () => {
         }] 
       });
 
-      // Stub specifically for the INSERT query
       queryStub.withArgs(sinon.match(/INSERT INTO events/)).resolves({
         rows: [{
           id: 1,

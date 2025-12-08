@@ -56,31 +56,16 @@ if [[ "$response" =~ ^([yY][eE][sS]|[yY])$ ]]; then
 fi
 
 # Run migrations
-echo -e "${YELLOW}Running database migrations...${NC}"
+echo -e "${YELLOW}Running database schema setup...${NC}"
 echo ""
 
-# Migration 1: Initial schema
-echo -e "${YELLOW}[1/2] Running initial schema migration...${NC}"
-if PGPASSWORD=$DB_PASSWORD psql -h $DB_HOST -p $DB_PORT -U $DB_USER -d $DB_NAME -f 01_initial_schema.sql; then
-    echo -e "${GREEN}✓ Initial schema created${NC}"
+# Execute complete schema
+echo -e "${YELLOW}Applying complete database schema...${NC}"
+if PGPASSWORD=$DB_PASSWORD psql -h $DB_HOST -p $DB_PORT -U $DB_USER -d $DB_NAME -f complete_schema_with_updates.sql; then
+    echo -e "${GREEN}✓ Schema applied successfully${NC}"
 else
-    echo -e "${RED}✗ Failed to create initial schema${NC}"
+    echo -e "${RED}✗ Failed to apply schema${NC}"
     exit 1
-fi
-echo ""
-
-# Migration 2: Enhanced fields
-echo -e "${YELLOW}[2/2] Running enhanced fields migration...${NC}"
-if PGPASSWORD=$DB_PASSWORD psql -h $DB_HOST -p $DB_PORT -U $DB_USER -d $DB_NAME -f 02_add_enhanced_fields.sql; then
-    echo -e "${GREEN}✓ Enhanced fields added${NC}"
-else
-    # Check if migration already applied
-    if PGPASSWORD=$DB_PASSWORD psql -h $DB_HOST -p $DB_PORT -U $DB_USER -d $DB_NAME -c "SELECT capacity FROM events LIMIT 1" >/dev/null 2>&1; then
-        echo -e "${YELLOW}⚠ Migration already applied, skipping${NC}"
-    else
-        echo -e "${RED}✗ Failed to add enhanced fields${NC}"
-        exit 1
-    fi
 fi
 echo ""
 
@@ -88,7 +73,7 @@ echo ""
 echo -e "${YELLOW}Verifying database tables...${NC}"
 TABLES=$(PGPASSWORD=$DB_PASSWORD psql -h $DB_HOST -p $DB_PORT -U $DB_USER -d $DB_NAME -c "SELECT tablename FROM pg_tables WHERE schemaname='public';" -t | tr -d ' ')
 
-EXPECTED_TABLES=("users" "user_profiles" "events" "event_attendees")
+EXPECTED_TABLES=("users" "user_profiles" "events" "event_attendees" "event_time_slots")
 for table in "${EXPECTED_TABLES[@]}"; do
     if echo "$TABLES" | grep -q "^$table$"; then
         echo -e "${GREEN}✓ Table '$table' exists${NC}"

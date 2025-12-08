@@ -38,7 +38,6 @@ export default function NewEventPage() {
 
     try {
       const token = getToken();
-      // data already includes timeSlots if applicable from EventForm
       const response = await fetch(`${API_URL}/api/events`, {
         method: 'POST',
         headers: {

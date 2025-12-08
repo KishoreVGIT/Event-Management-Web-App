@@ -1,9 +1,3 @@
-/**
- * Validate event dates
- * @param {string|Date} startDate 
- * @param {string|Date} endDate 
- * @returns {string|null} Error message or null if valid
- */
 export function validateEventDates(startDate, endDate) {
   if (startDate && endDate) {
     const start = new Date(startDate);
@@ -15,11 +9,6 @@ export function validateEventDates(startDate, endDate) {
   return null;
 }
 
-/**
- * Validate event capacity
- * @param {string|number} capacity 
- * @returns {string|null} Error message or null if valid
- */
 export function validateCapacity(capacity) {
   if (capacity !== null && capacity !== undefined) {
     const capacityNum = parseInt(capacity);
