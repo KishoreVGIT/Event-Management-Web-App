@@ -58,11 +58,11 @@ export function CancelEventDialog({ event, open, onOpenChange, onSuccess }) {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-red-600 dark:text-red-400">
+          <DialogTitle className="flex items-center gap-2 text-red-600">
             <AlertTriangle className="h-5 w-5" />
             Cancel Event
           </DialogTitle>
-          <DialogDescription>
+          <DialogDescription className='text-white'>
             Are you sure you want to cancel &quot;{event?.title}&quot;? This action will
             notify all attendees via email.
           </DialogDescription>
@@ -84,6 +84,7 @@ export function CancelEventDialog({ event, open, onOpenChange, onSuccess }) {
               value={reason}
               onChange={(e) => setReason(e.target.value)}
               disabled={loading}
+              className='text-white'
             />
             <p className="text-xs text-gray-500 mt-1">
               This message will be included in the cancellation email.
@@ -104,7 +105,7 @@ export function CancelEventDialog({ event, open, onOpenChange, onSuccess }) {
             type="button"
             variant="outline"
             onClick={() => onOpenChange(false)}
-            disabled={loading}>
+            disabled={loading} className='text-white hover:text-white'>
             Keep Event
           </Button>
           <Button
