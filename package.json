@@ -1,0 +1,19 @@
+{
+  "name": "event-management-web-app",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "test": "npm run test:unit && npm run test:e2e",
+    "test:unit": "concurrently \"cd backend && npm test\" \"cd frontend && npm test\"",
+    "backend:dev": "cd backend && npm run dev",
+    "frontend:dev": "cd frontend && npm run dev",
+    "dev": "concurrently \"npm run backend:dev\" \"npm run frontend:dev\" --names \"BACKEND,FRONTEND\" --prefix-colors \"blue,magenta\"",
+    "test:e2e:run": "cd frontend && npm run test:e2e:run",
+    "test:e2e": "start-server-and-test dev http://localhost:3000 \"npm run test:e2e:run\"",
+    "install:all": "npm install && cd backend && npm install && cd ../frontend && npm install"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.0",
+    "start-server-and-test": "^2.0.3"
+  }
+}
