@@ -1,7 +1,5 @@
 -- Campus Connect Event Management Database Schema
--- Complete schema including all migrations and updates
--- For Neon PostgreSQL Database with UUID support
--- Last Updated: December 2025
+-- Complete schema including all migrations and update
 
 -- ============================================
 -- STEP 1: Create Enum Type for User Roles

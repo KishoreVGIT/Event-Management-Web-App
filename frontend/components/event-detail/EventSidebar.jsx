@@ -42,22 +42,40 @@ export function EventSidebar({
                   <p className="text-xs text-slate-400">
                     Multi-day event with custom times:
                   </p>
-                  {event.timeSlots.map((slot, index) => (
-                    <div
-                      key={index}
-                      className="text-xs sm:text-sm text-slate-300 p-2 rounded-lg bg-slate-900/50 border border-slate-800">
-                      <div className="font-medium text-slate-200">
-                        {new Date(slot.date).toLocaleDateString('en-US', {
-                          weekday: 'short',
-                          month: 'short',
-                          day: 'numeric',
-                        })}
+                  {event.timeSlots.map((slot, index) => {
+                    if (!slot.date) return null;
+                    let dateStr = slot.date;
+                    if (typeof dateStr === 'string' && dateStr.includes('T')) {
+                      dateStr = dateStr.split('T')[0];
+                    }
+                    const dateObj = new Date(`${dateStr}T00:00:00`);
+                    if (isNaN(dateObj.getTime())) return null;
+
+                    return (
+                      <div
+                        key={index}
+                        className="text-xs sm:text-sm text-slate-300 p-2 rounded-lg bg-slate-900/50 border border-slate-800">
+                        <div className="font-medium text-slate-200">
+                          {dateObj.toLocaleDateString('en-US', {
+                            weekday: 'short',
+                            month: 'short',
+                            day: 'numeric',
+                          })}
+                        </div>
+                        <div className="text-slate-400 mt-0.5">
+                          {new Date(`2000-01-01T${slot.startTime}`).toLocaleTimeString('en-US', {
+                            hour: 'numeric',
+                            minute: '2-digit',
+                          })}
+                          {' - '}
+                          {new Date(`2000-01-01T${slot.endTime}`).toLocaleTimeString('en-US', {
+                            hour: 'numeric',
+                            minute: '2-digit',
+                          })}
+                        </div>
                       </div>
-                      <div className="text-slate-400 mt-0.5">
-                        {slot.startTime} - {slot.endTime}
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               ) : (
                 <div className="text-xs sm:text-sm text-slate-300">

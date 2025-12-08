@@ -8,7 +8,7 @@ import {
 export function DashboardStats({ stats }) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-      <Card className="bg-slate-950/70 border-slate-800/70 backdrop-blur-xl shadow-lg shadow-blue-900/10">
+      <Card className="bg-slate-950/70 border-slate-800/70 backdrop-blur-xl shadow-lg shadow-blue-900/10 pt-6">
         <CardHeader className="pb-3 border-b border-slate-800/70">
           <CardTitle className="text-sm font-medium text-slate-400">
             Total RSVPs
@@ -19,7 +19,7 @@ export function DashboardStats({ stats }) {
         </CardContent>
       </Card>
 
-      <Card className="bg-slate-950/70 border-slate-800/70 backdrop-blur-xl shadow-lg shadow-blue-900/10">
+      <Card className="bg-slate-950/70 border-slate-800/70 backdrop-blur-xl shadow-lg shadow-blue-900/10 pt-6">
         <CardHeader className="pb-3 border-b border-slate-800/70">
           <CardTitle className="text-sm font-medium text-slate-400">
             Upcoming Events
@@ -32,7 +32,7 @@ export function DashboardStats({ stats }) {
         </CardContent>
       </Card>
 
-      <Card className="bg-slate-950/70 border-slate-800/70 backdrop-blur-xl shadow-lg shadow-blue-900/10">
+      <Card className="bg-slate-950/70 border-slate-800/70 backdrop-blur-xl shadow-lg shadow-blue-900/10 pt-6">
         <CardHeader className="pb-3 border-b border-slate-800/70">
           <CardTitle className="text-sm font-medium text-slate-400">
             Past Events

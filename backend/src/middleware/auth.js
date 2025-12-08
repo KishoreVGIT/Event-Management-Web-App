@@ -13,7 +13,6 @@ export const authenticate = (req, res, next) => {
     const secret = process.env.JWT_SECRET || 'my-secret-123';
     const decoded = jwt.verify(token, secret);
 
-    // Normalize the shape here
     req.user = {
       ...decoded,
       id: decoded.id || decoded.userId || decoded.sub,

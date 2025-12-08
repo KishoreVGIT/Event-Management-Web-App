@@ -21,6 +21,7 @@ export function DateTimeRangePicker({
   startError,
   endError,
   label = 'Event Date & Time',
+  timeDisabled = false,
 }) {
   const [open, setOpen] = React.useState(false);
   const [endDateOpen, setEndDateOpen] = React.useState(false);
@@ -183,12 +184,29 @@ export function DateTimeRangePicker({
       newEndDate.setSeconds(0);
 
       onEndChange(newEndDate.toISOString());
-    } else if (value && startValue && !endValue) {
-      // Set end date to next day by default
+    } else if (value && startValue) {
+      // If toggling on, allow multi-day
       const start = new Date(startValue);
-      const end = new Date(start);
-      end.setDate(end.getDate() + 1);
-      onEndChange(end.toISOString());
+      const end = endValue ? new Date(endValue) : new Date(start);
+
+      const startDay = new Date(
+        start.getFullYear(),
+        start.getMonth(),
+        start.getDate()
+      );
+      const endDay = new Date(
+        end.getFullYear(),
+        end.getMonth(),
+        end.getDate()
+      );
+
+      // If end date is same as start date (or before), move it to next day
+      // This ensures parent components detect it as multi-day immediately
+      if (endDay.getTime() <= startDay.getTime()) {
+        const newEnd = new Date(end);
+        newEnd.setDate(newEnd.getDate() + 1);
+        onEndChange(newEnd.toISOString());
+      }
     }
   };
 
@@ -248,7 +266,10 @@ export function DateTimeRangePicker({
             id="start-time"
             value={startTime}
             onChange={handleStartTimeChange}
-            className="bg-slate-900/80 border-slate-800/80 text-slate-100 placeholder:text-slate-500 rounded-full focus:border-blue-500/60 focus:ring-2 focus:ring-blue-500/25 p-6"
+            disabled={timeDisabled}
+            className={`bg-slate-900/80 border-slate-800/80 text-slate-100 placeholder:text-slate-500 rounded-full focus:border-blue-500/60 focus:ring-2 focus:ring-blue-500/25 p-6 ${
+              timeDisabled ? 'opacity-50 cursor-not-allowed' : ''
+            }`}
           />
         </div>
 
@@ -264,7 +285,10 @@ export function DateTimeRangePicker({
             id="end-time"
             value={endTime}
             onChange={handleEndTimeChange}
-            className="bg-slate-900/80 border-slate-800/80 text-slate-100 placeholder:text-slate-500 rounded-full focus:border-blue-500/60 focus:ring-2 focus:ring-blue-500/25 p-6"
+            disabled={timeDisabled}
+            className={`bg-slate-900/80 border-slate-800/80 text-slate-100 placeholder:text-slate-500 rounded-full focus:border-blue-500/60 focus:ring-2 focus:ring-blue-500/25 p-6 ${
+              timeDisabled ? 'opacity-50 cursor-not-allowed' : ''
+            }`}
           />
         </div>
       </div>

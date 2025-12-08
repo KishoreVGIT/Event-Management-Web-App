@@ -115,7 +115,7 @@ export function EventsShowcase() {
       if (response.ok) {
         toast.success('RSVP successful!');
         setRsvpStatus((prev) => ({ ...prev, [eventId]: true }));
-        fetchEvents(); // Refresh to update attendee count
+        fetchEvents();
       } else {
         toast.error(data.error || 'Failed to RSVP');
       }
@@ -144,7 +144,7 @@ export function EventsShowcase() {
       if (response.ok) {
         toast.success('RSVP cancelled');
         setRsvpStatus((prev) => ({ ...prev, [eventId]: false }));
-        fetchEvents(); // Refresh to update attendee count
+        fetchEvents();
       } else {
         const data = await response.json();
         toast.error(data.error || 'Failed to cancel RSVP');

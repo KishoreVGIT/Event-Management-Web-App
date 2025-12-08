@@ -87,11 +87,11 @@ export default function EventsCalendarPage() {
   });
 
   const days = [];
-  // Add empty cells for days before the first day of the month
+
   for (let i = 0; i < startingDayOfWeek; i++) {
     days.push(null);
   }
-  // Add cells for each day of the month
+
   for (let day = 1; day <= daysInMonth; day++) {
     days.push(day);
   }
@@ -117,7 +117,7 @@ export default function EventsCalendarPage() {
       <main className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
         <CalendarHeader />
 
-        <Card className="bg-slate-950/70 border-slate-800/70 backdrop-blur-xl rounded-2xl shadow-2xl shadow-blue-900/20">
+        <Card className="bg-slate-950/70 border-slate-800/70 backdrop-blur-xl rounded-2xl shadow-2xl shadow-blue-900/20 pt-6">
           <CardHeader className="border-b border-slate-800/70">
             <MonthNavigation
               monthName={monthName}

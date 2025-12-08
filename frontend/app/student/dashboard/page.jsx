@@ -142,12 +142,12 @@ export default function StudentDashboardPage() {
           </div>
           <div className="flex gap-3">
              <Link href="/events">
-                <Button className="border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white">
+                <Button>
                   Browse Events
                 </Button>
               </Link>
              <Link href="/student/my-events">
-                <Button className="border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white">
+                <Button>
                   My Events
                 </Button>
               </Link>
@@ -172,7 +172,7 @@ export default function StudentDashboardPage() {
           </div>
 
           {upcomingRsvps.length === 0 ? (
-            <Card className="bg-slate-950/70 border-slate-800/70 backdrop-blur-xl">
+            <Card className="bg-slate-950/70 border-slate-800/70 backdrop-blur-xl pt-6">
               <CardContent className="py-16 text-center">
                 <div className="w-16 h-16 bg-slate-900/80 rounded-full flex items-center justify-center mx-auto mb-4 border border-slate-800">
                   <Clock className="w-8 h-8 text-slate-500" />
@@ -216,7 +216,7 @@ export default function StudentDashboardPage() {
           </div>
 
           {recommendedEvents.length === 0 ? (
-            <Card className="bg-slate-950/70 border-slate-800/70 backdrop-blur-xl">
+            <Card className="bg-slate-950/70 border-slate-800/70 backdrop-blur-xl pt-6">
               <CardContent className="py-12 text-center text-slate-400">
                 No recommended events at this time.
               </CardContent>

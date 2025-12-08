@@ -176,7 +176,6 @@ export default function EventsPage() {
       minute: '2-digit',
     };
 
-    // No end date → single point in time
     if (!end) {
       return `${start.toLocaleDateString(
         'en-US',
@@ -186,7 +185,7 @@ export default function EventsPage() {
 
     const sameDay = start.toDateString() === end.toDateString();
 
-    // Single-day event → "Mon, Dec 8 · 6:00 PM – 9:00 PM"
+
     if (sameDay) {
       return `${start.toLocaleDateString(
         'en-US',
@@ -197,7 +196,6 @@ export default function EventsPage() {
       )} – ${end.toLocaleTimeString('en-US', timeOptions)}`;
     }
 
-    // Multi-day event → "Mon, Dec 8 – Thu, Dec 11 · 6:00 PM – 9:00 PM each day"
     const dateRange = `${start.toLocaleDateString(
       'en-US',
       dateOptions

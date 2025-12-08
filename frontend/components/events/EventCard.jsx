@@ -75,12 +75,12 @@ export function EventCard({
               {formatEventDate(event.startDate, event.endDate)}
             </span>
             {event.timeSlots && event.timeSlots.length > 0 && (
-              <div className="mt-1 flex items-center gap-1">
-                <span className="inline-block w-1 h-1 rounded-full bg-blue-400"></span>
-                <span className="text-[10px] text-blue-400 font-medium">
-                  Custom times for each day
-                </span>
-              </div>
+                <div className="mt-1.5 inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-blue-500/10 border border-blue-500/20">
+                  <Calendar className="w-3 h-3 text-blue-400" />
+                  <span className="text-[10px] text-blue-300 font-medium">
+                    Different times daily
+                  </span>
+                </div>
             )}
           </div>
         </div>

@@ -11,6 +11,17 @@ import { EventDescription } from '@/components/event-detail/EventDescription';
 import { EventSidebar } from '@/components/event-detail/EventSidebar';
 import { EventNotFound } from '@/components/event-detail/EventNotFound';
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+
 export default function EventDetailPage() {
   const router = useRouter();
   const params = useParams();
@@ -20,6 +31,7 @@ export default function EventDetailPage() {
   const [hasRsvp, setHasRsvp] = useState(false);
   const [loading, setLoading] = useState(true);
   const [rsvpLoading, setRsvpLoading] = useState(false);
+  const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false);
 
   const eventId = useMemo(() => {
     const id = params?.id;
@@ -106,7 +118,6 @@ export default function EventDetailPage() {
 
       if (response.ok) {
         setHasRsvp(true);
-        // Refresh event data to update attendee count
         fetchEvent();
         toast.success('You have successfully RSVPed to this event!');
       } else {
@@ -122,8 +133,6 @@ export default function EventDetailPage() {
   };
 
   const handleCancelRsvp = async () => {
-    if (!confirm('Are you sure you want to cancel your RSVP?')) return;
-
     setRsvpLoading(true);
     try {
       const token = getToken();
@@ -139,9 +148,9 @@ export default function EventDetailPage() {
 
       if (response.ok) {
         setHasRsvp(false);
-        // Refresh event data
         fetchEvent();
         toast.info('Your RSVP has been cancelled.');
+        setIsCancelDialogOpen(false);
       } else {
         const data = await response.json();
         toast.error(data.error || 'Failed to cancel RSVP');
@@ -181,6 +190,13 @@ export default function EventDetailPage() {
       day: 'numeric',
     };
     const timeOptions = { hour: '2-digit', minute: '2-digit' };
+
+    if (event?.timeSlots && event.timeSlots.length > 0) {
+      if (end && start.toDateString() !== end.toDateString()) {
+         return `${start.toLocaleDateString('en-US', dateOptions)} - ${end.toLocaleDateString('en-US', dateOptions)}`;
+      }
+      return start.toLocaleDateString('en-US', dateOptions);
+    }
 
     if (end) {
       // Check if same day
@@ -265,11 +281,37 @@ export default function EventDetailPage() {
               capacity={capacity}
               formatEventDate={formatEventDate}
               onRsvp={handleRsvp}
-              onCancelRsvp={handleCancelRsvp}
+              onCancelRsvp={() => setIsCancelDialogOpen(true)}
             />
           </div>
         </div>
       </main>
+
+      <AlertDialog open={isCancelDialogOpen} onOpenChange={setIsCancelDialogOpen}>
+        <AlertDialogContent className="bg-slate-950 border-slate-800 text-slate-100">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Cancel RSVP?</AlertDialogTitle>
+            <AlertDialogDescription className="text-slate-400">
+              Are you sure you want to cancel your RSVP for this event?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel 
+              onClick={() => setIsCancelDialogOpen(false)}
+              className="text-black"
+            >
+              Keep RSVP
+            </AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleCancelRsvp}
+              className="bg-red-600 hover:bg-red-700 text-white border-0"
+              disabled={rsvpLoading}
+            >
+              {rsvpLoading ? 'Cancelling...' : 'Yes, Cancel RSVP'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

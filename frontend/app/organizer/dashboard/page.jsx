@@ -24,7 +24,7 @@ import {
 
 export default function OrganizerDashboard() {
   const router = useRouter();
-  const { user, signout, loading: authLoading, getToken } = useAuth();
+  const { user, loading: authLoading, getToken } = useAuth();
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [postponeDialogOpen, setPostponeDialogOpen] = useState(false);
@@ -84,14 +84,14 @@ export default function OrganizerDashboard() {
     toast.success(
       `Event postponed successfully! ${result.emailsSent} attendees notified.`
     );
-    fetchMyEvents(); // Refresh events
+    fetchMyEvents();
   };
 
   const handleCancelSuccess = (result) => {
     toast.success(
       `Event cancelled successfully! ${result.emailsSent} attendees notified.`
     );
-    fetchMyEvents(); // Refresh events
+    fetchMyEvents();
   };
 
   const handleViewAttendees = (event) => {

@@ -1,6 +1,5 @@
 import { request, expect, sinon } from '../chai-setup.js';
 import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
 import app from '../../src/index.js';
 
 import pool from '../../src/db.js';

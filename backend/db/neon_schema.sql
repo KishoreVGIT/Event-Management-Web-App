@@ -1,5 +1,4 @@
 -- Campus Connect Event Management Database Schema
--- For Neon PostgreSQL Database
 -- Run this in Neon's SQL Editor to set up your database
 
 -- ============================================

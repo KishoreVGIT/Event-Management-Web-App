@@ -42,7 +42,7 @@ router.post('/:eventId', authenticate, rsvpLimiter, async (req, res) => {
         .json({ error: "You have already RSVP'd to this event" });
     }
 
-    // Check capacity if set (atomic check within transaction)
+
     if (event.capacity !== null) {
       const attendeeCount = await client.query(
         'SELECT COUNT(*)::int as count FROM event_attendees WHERE event_id = $1',
@@ -82,17 +82,13 @@ router.post('/:eventId', authenticate, rsvpLimiter, async (req, res) => {
       [eventId]
     );
 
-    // Commit transaction
     await client.query('COMMIT');
 
-    // Fetch user details for email (JWT doesn't include name)
     const userResult = await query(
       'SELECT id, name, email FROM users WHERE id = $1',
       [userId]
     );
 
-    // Send confirmation email to the student who RSVP'd
-    // Await the email to ensure it sends before the serverless function/process might be terminated
     const eventData = {
       id: eventResult.rows[0].id,
       title: eventResult.rows[0].title,
@@ -112,7 +108,6 @@ router.post('/:eventId', authenticate, rsvpLimiter, async (req, res) => {
       await sendRsvpConfirmationEmail(userData, eventData);
     } catch (err) {
       console.error('Failed to send RSVP confirmation email:', err);
-      // We don't fail the request if email fails, but we now process it before returning
     }
 
     res.status(201).json({
@@ -142,12 +137,10 @@ router.post('/:eventId', authenticate, rsvpLimiter, async (req, res) => {
       },
     });
   } catch (error) {
-    // Rollback transaction on error
     await client.query('ROLLBACK');
     console.error('Error creating RSVP:', error);
     res.status(500).json({ error: 'Failed to RSVP to event' });
   } finally {
-    // Always release the client back to the pool
     client.release();
   }
 });

@@ -26,7 +26,7 @@ const postponeSchema = yup.object().shape({
     .nullable()
     .test('is-after-start', 'End date/time must be after start date/time', function(value) {
       const { newStartDate } = this.parent;
-      if (!value || !newStartDate) return true; // Skip if either is null
+      if (!value || !newStartDate) return true;
       return new Date(value) > new Date(newStartDate);
     }),
 });

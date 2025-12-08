@@ -77,7 +77,7 @@ describe('Admin Routes', () => {
 
     it('should prevent deleting self', async () => {
       const res = await request(app)
-        .delete('/api/admin/users/99') // 99 is the admin's ID in the token
+        .delete('/api/admin/users/99')
         .set('Authorization', adminAuthHeader);
 
       expect(res.status).to.equal(400);

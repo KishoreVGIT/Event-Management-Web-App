@@ -4,6 +4,7 @@ import { useState, useRef } from 'react';
 import { Upload, X, Image as ImageIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { API_URL } from '@/lib/constants';
+import { toast } from 'sonner';
 
 export function ImageUpload({ value, onChange, onRemove, disabled = false }) {
   const [uploading, setUploading] = useState(false);
@@ -15,13 +16,13 @@ export function ImageUpload({ value, onChange, onRemove, disabled = false }) {
 
     // Validate file type
     if (!file.type.startsWith('image/')) {
-      alert('Please upload an image file');
+      toast.error('Please upload an image file');
       return;
     }
 
     // Validate file size (5MB)
     if (file.size > 5 * 1024 * 1024) {
-      alert('File size must be less than 5MB');
+      toast.error('File size must be less than 5MB');
       return;
     }
 
@@ -47,9 +48,10 @@ export function ImageUpload({ value, onChange, onRemove, disabled = false }) {
 
       const data = await response.json();
       onChange(data.imageUrl);
+      toast.success('Image uploaded successfully');
     } catch (error) {
       console.error('Upload error:', error);
-      alert(`Failed to upload image: ${error.message}`);
+      toast.error(`Failed to upload image: ${error.message}`);
     } finally {
       setUploading(false);
     }

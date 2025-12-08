@@ -13,11 +13,28 @@ import { API_URL } from '@/lib/constants';
 import { RsvpCard } from '@/components/student/RsvpCard';
 import { Calendar } from 'lucide-react';
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { toast } from 'sonner';
+
 export default function MyEventsPage() {
   const router = useRouter();
   const { user, getToken, loading: authLoading } = useAuth();
   const [rsvps, setRsvps] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  // RSVP Cancellation State
+  const [cancelEventId, setCancelEventId] = useState(null);
+  const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false);
+  const [cancelling, setCancelling] = useState(false);
 
   useEffect(() => {
     if (authLoading) return;
@@ -45,22 +62,28 @@ export default function MyEventsPage() {
         setRsvps(data);
       } else {
         console.error('Failed to fetch RSVPs');
+        toast.error('Failed to fetch your RSVPs');
       }
     } catch (error) {
       console.error('Error fetching RSVPs:', error);
+      toast.error('Failed to load your RSVPs');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleCancelRsvp = async (eventId) => {
-    if (!confirm('Are you sure you want to cancel your RSVP?')) {
-      return;
-    }
+  const confirmCancelRsvp = (eventId) => {
+    setCancelEventId(eventId);
+    setIsCancelDialogOpen(true);
+  };
 
+  const handleCancelRsvp = async () => {
+    if (!cancelEventId) return;
+
+    setCancelling(true);
     try {
       const token = getToken();
-      const response = await fetch(`${API_URL}/api/rsvp/${eventId}`, {
+      const response = await fetch(`${API_URL}/api/rsvp/${cancelEventId}`, {
         method: 'DELETE',
         headers: {
           Authorization: `Bearer ${token}`,
@@ -68,14 +91,19 @@ export default function MyEventsPage() {
       });
 
       if (response.ok) {
-        setRsvps(rsvps.filter((rsvp) => rsvp.eventId !== eventId));
+        setRsvps(rsvps.filter((rsvp) => rsvp.eventId !== cancelEventId));
+        toast.success('RSVP cancelled successfully');
+        setIsCancelDialogOpen(false);
       } else {
         const data = await response.json();
-        alert(data.error || 'Failed to cancel RSVP');
+        toast.error(data.error || 'Failed to cancel RSVP');
       }
     } catch (error) {
       console.error('Error cancelling RSVP:', error);
-      alert('Failed to cancel RSVP');
+      toast.error('Failed to cancel RSVP');
+    } finally {
+      setCancelling(false);
+      setCancelEventId(null);
     }
   };
 
@@ -192,12 +220,12 @@ export default function MyEventsPage() {
           </div>
           <div className="flex gap-3">
              <Link href="/events">
-                <Button variant="outline" className="border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white">
+                <Button >
                   Browse Events
                 </Button>
               </Link>
              <Link href="/student/dashboard">
-                <Button variant="outline" className="border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white">
+                <Button>
                   Dashboard
                 </Button>
               </Link>
@@ -234,7 +262,7 @@ export default function MyEventsPage() {
                     <RsvpCard
                       key={rsvp.id}
                       rsvp={rsvp}
-                      onCancel={handleCancelRsvp}
+                      onCancel={confirmCancelRsvp}
                       formatDate={formatEventDate}
                       getStatus={getEventStatus}
                     />
@@ -254,7 +282,7 @@ export default function MyEventsPage() {
                     <RsvpCard
                       key={rsvp.id}
                       rsvp={rsvp}
-                      onCancel={handleCancelRsvp}
+                      onCancel={confirmCancelRsvp}
                       formatDate={formatEventDate}
                       getStatus={getEventStatus}
                     />
@@ -274,7 +302,7 @@ export default function MyEventsPage() {
                     <RsvpCard
                       key={rsvp.id}
                       rsvp={rsvp}
-                      onCancel={handleCancelRsvp}
+                      onCancel={confirmCancelRsvp}
                       formatDate={formatEventDate}
                       getStatus={getEventStatus}
                     />
@@ -284,6 +312,32 @@ export default function MyEventsPage() {
             )}
           </div>
         )}
+
+        <AlertDialog open={isCancelDialogOpen} onOpenChange={setIsCancelDialogOpen}>
+          <AlertDialogContent className="bg-slate-950 border-slate-800 text-slate-100">
+            <AlertDialogHeader>
+              <AlertDialogTitle>Cancel RSVP?</AlertDialogTitle>
+              <AlertDialogDescription className="text-slate-400">
+                Are you sure you want to cancel your RSVP for this event? Your spot may be given to someone else.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel 
+                className="text-black"
+                onClick={() => setIsCancelDialogOpen(false)}
+              >
+                Keep RSVP
+              </AlertDialogCancel>
+              <AlertDialogAction 
+                onClick={handleCancelRsvp}
+                className="bg-red-600 hover:bg-red-700 text-white border-0"
+                disabled={cancelling}
+              >
+                {cancelling ? 'Cancelling...' : 'Yes, Cancel RSVP'}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </main>
     </div>
   );

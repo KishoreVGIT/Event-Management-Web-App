@@ -16,6 +16,8 @@ import {
   generateGoogleCalendarUrl,
 } from '@/lib/calendar-export';
 
+import { toast } from 'sonner';
+
 export function AddToCalendar({ event }) {
   const [isDownloading, setIsDownloading] = useState(false);
 
@@ -27,7 +29,7 @@ export function AddToCalendar({ event }) {
       await downloadICalFile(event);
     } catch (error) {
       console.error('Failed to download calendar file:', error);
-      alert('Failed to download calendar file. Please try again.');
+      toast.error('Failed to download calendar file. Please try again.');
     } finally {
       setIsDownloading(false);
     }
