@@ -7,8 +7,7 @@ import { sendWelcomeEmail } from '../services/email.js';
 
 const router = express.Router();
 
-const JWT_SECRET =
-  process.env.JWT_SECRET || 'your-secret-key-change-this';
+
 
 router.post('/signup', authLimiter, async (req, res) => {
   try {
@@ -46,9 +45,10 @@ router.post('/signup', authLimiter, async (req, res) => {
 
     const user = result.rows[0];
 
+    const secret = process.env.JWT_SECRET || 'my-secret-123';
     const token = jwt.sign(
       { userId: user.id, email: user.email, role: user.role },
-      JWT_SECRET,
+      secret,
       { expiresIn: '7d' }
     );
 
@@ -110,9 +110,10 @@ router.post('/signin', authLimiter, async (req, res) => {
         .json({ error: 'Invalid email or password' });
     }
 
+    const secret = process.env.JWT_SECRET || 'my-secret-123';
     const token = jwt.sign(
       { userId: user.id, email: user.email, role: user.role },
-      JWT_SECRET,
+      secret,
       { expiresIn: '7d' }
     );
 
@@ -141,7 +142,8 @@ router.get('/me', async (req, res) => {
       return res.status(401).json({ error: 'No token provided' });
     }
 
-    const decoded = jwt.verify(token, JWT_SECRET);
+    const secret = process.env.JWT_SECRET || 'my-secret-123';
+    const decoded = jwt.verify(token, secret);
 
     const result = await query(
       'SELECT id, name, email, role, organization_name FROM users WHERE id = $1',
