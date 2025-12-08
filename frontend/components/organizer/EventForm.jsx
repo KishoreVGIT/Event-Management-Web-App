@@ -124,8 +124,6 @@ export function EventForm({
             endTime: existingSlot?.endTime || '17:00',
           });
         }
-        // Only update if length changed or dates changed to avoid infinite loop
-        // Simplify: just set it.
         setTimeSlots(slots);
       } else {
         setUseTimeSlots(false);

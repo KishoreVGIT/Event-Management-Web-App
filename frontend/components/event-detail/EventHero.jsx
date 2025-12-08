@@ -10,20 +10,22 @@ export function EventHero({ event, status, organizerName, formatEventDate }) {
   };
 
   return (
-    <div className="relative w-full">
+    <div className="relative w-full min-h-[280px] sm:min-h-[340px] lg:min-h-[420px]">
       <div className="relative h-[280px] sm:h-[340px] lg:h-[420px] overflow-hidden">
         {/* Background image / gradient */}
-        {event.imageUrl ? (
-          <Image
-            src={event.imageUrl}
-            alt={event.title}
-            fill
-            priority
-            className="object-cover scale-105 blur-[0.5px]"
-          />
-        ) : (
-          <div className="w-full h-full bg-gradient-to-br from-blue-700 via-indigo-600 to-slate-900" />
-        )}
+        <div className="absolute inset-0">
+          {event.imageUrl ? (
+            <Image
+              src={event.imageUrl}
+              alt={event.title}
+              fill
+              priority
+              className="object-cover scale-105 blur-[0.5px]"
+            />
+          ) : (
+            <div className="w-full h-full bg-gradient-to-br from-blue-700 via-indigo-600 to-slate-900" />
+          )}
+        </div>
 
         {/* Overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/90 to-slate-900/10" />
@@ -32,7 +34,6 @@ export function EventHero({ event, status, organizerName, formatEventDate }) {
         <div className="relative max-w-6xl mx-auto h-full px-4 sm:px-6 lg:px-8 flex items-end pb-8">
           <div className="flex flex-col gap-4 w-full">
             <div className="flex items-center justify-between gap-4">
-              {/* Back button */}
               <Link href="/events">
                 <div className="flex gap-1 items-center px-3 py-1 border rounded-full border-slate-700 bg-slate-950/60 text-slate-100 hover:bg-slate-900 hover:border-slate-600 hover:text-white">
                   <ArrowLeft className="w-4 h-4 mr-2" />
@@ -40,9 +41,9 @@ export function EventHero({ event, status, organizerName, formatEventDate }) {
                 </div>
               </Link>
 
-              {/* Status badge */}
               <span
-                className={`px-4 py-1.5 text-xs sm:text-sm font-semibold rounded-full backdrop-blur-md shadow-lg flex items-center gap-2 ${statusStyles[status]}`}>
+                className={`px-4 py-1.5 text-xs sm:text-sm font-semibold rounded-full backdrop-blur-md shadow-lg flex items-center gap-2 ${statusStyles[status]}`}
+              >
                 <span className="inline-block w-2 h-2 rounded-full bg-white/80" />
                 {status.charAt(0).toUpperCase() + status.slice(1)}
               </span>
