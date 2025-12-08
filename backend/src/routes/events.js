@@ -467,6 +467,16 @@ router.put(
       );
 
       // Send update notification emails to all attendees
+      const eventData = {
+        id: event.id,
+        title: event.title,
+        description: event.description,
+        startDate: event.start_date,
+        endDate: event.end_date,
+        location: event.location,
+        category: event.category,
+      };
+
       try {
         const emailPromises = attendeesResult.rows.map((attendee) => {
           const userData = {
@@ -575,6 +585,16 @@ router.post(
       );
 
       // Send cancellation emails to all attendees
+      const eventData = {
+        id: event.id,
+        title: event.title,
+        description: event.description,
+        startDate: event.start_date,
+        endDate: event.end_date,
+        location: event.location,
+        category: event.category,
+      };
+
       try {
         const emailPromises = attendeesResult.rows.map((attendee) => {
           return sendEventCancellationEmail(attendee, eventData).catch((err) => {
@@ -697,6 +717,16 @@ router.post(
       );
 
       // Send update emails to all attendees
+      const eventData = {
+        id: result.rows[0].id,
+        title: result.rows[0].title,
+        description: result.rows[0].description,
+        startDate: result.rows[0].start_date,
+        endDate: result.rows[0].end_date,
+        location: result.rows[0].location,
+        category: result.rows[0].category,
+      };
+
       try {
         const emailPromises = attendeesResult.rows.map((attendee) => {
           return sendEventUpdateEmail(attendee, eventData).catch((err) => {

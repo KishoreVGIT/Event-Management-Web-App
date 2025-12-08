@@ -1,8 +1,5 @@
 import jwt from 'jsonwebtoken';
 
-const JWT_SECRET =
-  process.env.JWT_SECRET || 'your-secret-key-change-this';
-
 export const authenticate = (req, res, next) => {
   try {
     const token = req.headers.authorization?.replace('Bearer ', '');
@@ -13,7 +10,8 @@ export const authenticate = (req, res, next) => {
         .json({ error: 'Authentication required' });
     }
 
-    const decoded = jwt.verify(token, JWT_SECRET);
+    const secret = process.env.JWT_SECRET || 'my-secret-123';
+    const decoded = jwt.verify(token, secret);
 
     // Normalize the shape here
     req.user = {

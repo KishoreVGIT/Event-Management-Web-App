@@ -25,10 +25,11 @@ console.log('Email transporter config:', {
   user: transportConfig.auth.user,
 });
 
+// NOTE: This email configuration works on localhost, not on production.
 export const transporter = nodemailer.createTransport(transportConfig);
 
 // Verify connection configuration
-transporter.verify(function (error, success) {
+transporter.verify(function (error, _success) {
   if (error) {
     console.error('Email server connection error:', error);
   } else {
