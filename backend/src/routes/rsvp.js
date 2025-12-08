@@ -91,7 +91,8 @@ router.post('/:eventId', authenticate, rsvpLimiter, async (req, res) => {
       [userId]
     );
 
-    // Send confirmation email to the student who RSVP'd (don't wait for it)
+    // Send confirmation email to the student who RSVP'd
+    // Await the email to ensure it sends before the serverless function/process might be terminated
     const eventData = {
       id: eventResult.rows[0].id,
       title: eventResult.rows[0].title,
@@ -107,9 +108,12 @@ router.post('/:eventId', authenticate, rsvpLimiter, async (req, res) => {
       email: userResult.rows[0].email,
     };
 
-    sendRsvpConfirmationEmail(userData, eventData).catch(err => {
+    try {
+      await sendRsvpConfirmationEmail(userData, eventData);
+    } catch (err) {
       console.error('Failed to send RSVP confirmation email:', err);
-    });
+      // We don't fail the request if email fails, but we now process it before returning
+    }
 
     res.status(201).json({
       message: 'RSVP successful',

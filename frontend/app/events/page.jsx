@@ -274,7 +274,7 @@ export default function EventsPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-950 to-slate-900">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 lg:px-0 py-8 lg:py-12">
         <EventsHeader />
 
         {/* Search and Filter Section */}
