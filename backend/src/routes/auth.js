@@ -52,10 +52,12 @@ router.post('/signup', authLimiter, async (req, res) => {
       { expiresIn: '7d' }
     );
 
-    // Send welcome email (non-blocking)
-    sendWelcomeEmail(user).catch(err => {
+    // Send welcome email
+    try {
+      await sendWelcomeEmail(user);
+    } catch (err) {
       console.error('Failed to send welcome email:', err);
-    });
+    }
 
     res.status(201).json({
       message: 'User created successfully',

@@ -466,30 +466,25 @@ router.put(
         [id]
       );
 
-      // Send update notification emails to all attendees (don't wait)
-      const eventData = {
-        id: event.id,
-        title: event.title,
-        description: event.description,
-        startDate: event.start_date,
-        endDate: event.end_date,
-        location: event.location,
-        category: event.category,
-      };
-
-      attendeesResult.rows.forEach((attendee) => {
-        const userData = {
-          id: attendee.user_id,
-          name: attendee.user_name,
-          email: attendee.user_email,
-        };
-        sendEventUpdateEmail(userData, eventData).catch((err) => {
-          console.error(
-            `Failed to send update email to ${attendee.user_email}:`,
-            err
-          );
+      // Send update notification emails to all attendees
+      try {
+        const emailPromises = attendeesResult.rows.map((attendee) => {
+          const userData = {
+            id: attendee.user_id,
+            name: attendee.user_name,
+            email: attendee.user_email,
+          };
+          return sendEventUpdateEmail(userData, eventData).catch((err) => {
+            console.error(
+              `Failed to send update email to ${attendee.user_email}:`,
+              err
+            );
+          });
         });
-      });
+        await Promise.all(emailPromises);
+      } catch (err) {
+        console.error('Error sending update emails:', err);
+      }
 
       res.json({
         id: event.id,
@@ -579,25 +574,20 @@ router.post(
         [id]
       );
 
-      // Send cancellation emails to all attendees (don't wait)
-      const eventData = {
-        id: event.id,
-        title: event.title,
-        description: event.description,
-        startDate: event.start_date,
-        endDate: event.end_date,
-        location: event.location,
-        category: event.category,
-      };
-
-      attendeesResult.rows.forEach((attendee) => {
-        sendEventCancellationEmail(attendee, eventData).catch((err) => {
-          console.error(
-            `Failed to send cancellation email to ${attendee.email}:`,
-            err
-          );
+      // Send cancellation emails to all attendees
+      try {
+        const emailPromises = attendeesResult.rows.map((attendee) => {
+          return sendEventCancellationEmail(attendee, eventData).catch((err) => {
+            console.error(
+              `Failed to send cancellation email to ${attendee.email}:`,
+              err
+            );
+          });
         });
-      });
+        await Promise.all(emailPromises);
+      } catch (err) {
+        console.error('Error sending cancellation emails:', err);
+      }
 
       res.json({
         message: 'Event cancelled successfully',
@@ -706,25 +696,20 @@ router.post(
         [id]
       );
 
-      // Send update emails to all attendees (don't wait)
-      const eventData = {
-        id: result.rows[0].id,
-        title: result.rows[0].title,
-        description: result.rows[0].description,
-        startDate: result.rows[0].start_date,
-        endDate: result.rows[0].end_date,
-        location: result.rows[0].location,
-        category: result.rows[0].category,
-      };
-
-      attendeesResult.rows.forEach((attendee) => {
-        sendEventUpdateEmail(attendee, eventData).catch((err) => {
-          console.error(
-            `Failed to send update email to ${attendee.email}:`,
-            err
-          );
+      // Send update emails to all attendees
+      try {
+        const emailPromises = attendeesResult.rows.map((attendee) => {
+          return sendEventUpdateEmail(attendee, eventData).catch((err) => {
+            console.error(
+              `Failed to send update email to ${attendee.email}:`,
+              err
+            );
+          });
         });
-      });
+        await Promise.all(emailPromises);
+      } catch (err) {
+        console.error('Error sending postponement emails:', err);
+      }
 
       res.json({
         message: 'Event postponed successfully',

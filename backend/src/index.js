@@ -13,7 +13,7 @@ import adminRoutes from './routes/admin.js';
 import uploadRoutes from './routes/upload.js';
 import profileRoutes from './routes/profile.js';
 import { apiLimiter } from './middleware/rate-limit.js';
-
+import { transporter } from './services/email.js';
 const app = express();
 const PORT = process.env.PORT || 4000;
 
@@ -41,6 +41,16 @@ app.use('/api/rsvp', rsvpRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/profile', profileRoutes);
+// Health‑check endpoint for email transporter
+app.get('/api/email-status', async (req, res) => {
+  try {
+    await transporter.verify();
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Email transporter verification failed:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
 
 async function startServer() {
   try {
