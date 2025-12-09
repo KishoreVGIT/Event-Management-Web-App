@@ -76,7 +76,7 @@ export default function AdminEventsPage() {
 
   const handleDeleteEvent = async () => {
     if (!deleteEventId) return;
-    
+
     setDeleting(true);
     try {
       const token = getToken();
@@ -144,7 +144,7 @@ export default function AdminEventsPage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-950 to-slate-900">
       <AdminHeader title="Event Management" />
-      
+
       <div className="fixed inset-0 bg-[linear-gradient(to_right,#1e293b_1px,transparent_1px),linear-gradient(to_bottom,#1e293b_1px,transparent_1px)] bg-[size:4rem_4rem] opacity-5 pointer-events-none" />
 
       <main className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -166,28 +166,32 @@ export default function AdminEventsPage() {
           handleDeleteEvent={confirmDeleteEvent}
         />
 
-        <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialog
+          open={isDeleteDialogOpen}
+          onOpenChange={setIsDeleteDialogOpen}>
           <AlertDialogContent className="bg-slate-950 border-slate-800 text-slate-100">
             <AlertDialogHeader>
               <AlertDialogTitle>Are you sure?</AlertDialogTitle>
               <AlertDialogDescription className="text-slate-400">
-                This action cannot be undone. This will permanently delete the event
-                <span className="font-semibold text-slate-200"> "{deleteEventTitle}" </span>
+                This action cannot be undone. This will permanently
+                delete the event
+                <span className="font-semibold text-slate-200">
+                  {' '}
+                  "{deleteEventTitle}"{' '}
+                </span>
                 and remove all RSVPs.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel 
-                className="text-black"
-                onClick={() => setIsDeleteDialogOpen(false)}
-              >
+              <AlertDialogCancel
+                className="text-white hover:text-white"
+                onClick={() => setIsDeleteDialogOpen(false)}>
                 Cancel
               </AlertDialogCancel>
-              <AlertDialogAction 
+              <AlertDialogAction
                 onClick={handleDeleteEvent}
                 className="bg-red-600 hover:bg-red-700 text-white border-0"
-                disabled={deleting}
-              >
+                disabled={deleting}>
                 {deleting ? 'Deleting...' : 'Delete'}
               </AlertDialogAction>
             </AlertDialogFooter>
@@ -197,4 +201,3 @@ export default function AdminEventsPage() {
     </div>
   );
 }
-

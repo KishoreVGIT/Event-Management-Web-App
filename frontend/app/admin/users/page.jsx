@@ -177,7 +177,7 @@ export default function AdminUsersPage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-950 to-slate-900">
       <AdminHeader title="User Management" />
-      
+
       <div className="fixed inset-0 bg-[linear-gradient(to_right,#1e293b_1px,transparent_1px),linear-gradient(to_bottom,#1e293b_1px,transparent_1px)] bg-[size:4rem_4rem] opacity-5 pointer-events-none" />
 
       <main className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -199,17 +199,25 @@ export default function AdminUsersPage() {
           handleDeleteUser={handleDeleteUser}
         />
 
-        <Dialog open={isRoleDialogOpen} onOpenChange={setIsRoleDialogOpen}>
+        <Dialog
+          open={isRoleDialogOpen}
+          onOpenChange={setIsRoleDialogOpen}>
           <DialogContent className="bg-slate-950 border-slate-800 text-slate-100 sm:max-w-[425px]">
             <DialogHeader>
               <DialogTitle>Change User Role</DialogTitle>
               <DialogDescription className="text-slate-400">
-                Update the role for <span className="text-slate-200 font-semibold">{selectedUser?.name}</span>.
+                Update the role for{' '}
+                <span className="text-slate-200 font-semibold">
+                  {selectedUser?.name}
+                </span>
+                .
               </DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-4">
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="role" className="text-right text-slate-300">
+                <Label
+                  htmlFor="role"
+                  className="text-right text-slate-300">
                   Role
                 </Label>
                 <Select value={newRole} onValueChange={setNewRole}>
@@ -218,21 +226,24 @@ export default function AdminUsersPage() {
                   </SelectTrigger>
                   <SelectContent className="bg-slate-900 border-slate-700 text-slate-100">
                     <SelectItem value="student">Student</SelectItem>
-                    <SelectItem value="organizer">Organizer</SelectItem>
+                    <SelectItem value="organizer">
+                      Organizer
+                    </SelectItem>
                     <SelectItem value="admin">Admin</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
             </div>
             <DialogFooter>
-              <Button 
-                variant="outline" 
+              <Button
                 onClick={() => setIsRoleDialogOpen(false)}
-                className="text-black"
-              >
+                className="text-white">
                 Cancel
               </Button>
-              <Button onClick={handleSaveRole} disabled={updating} className="bg-blue-600 hover:bg-blue-500 text-white">
+              <Button
+                onClick={handleSaveRole}
+                disabled={updating}
+                className="bg-blue-600 hover:bg-blue-500 text-white">
                 {updating ? 'Saving...' : 'Save Changes'}
               </Button>
             </DialogFooter>
@@ -242,4 +253,3 @@ export default function AdminUsersPage() {
     </div>
   );
 }
-
